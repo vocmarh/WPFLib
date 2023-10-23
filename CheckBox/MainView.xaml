@@ -1,0 +1,30 @@
+﻿<Window x:Class="CheckBox.MainView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CheckBox"
+             mc:Ignorable="d" 
+             d:DesignHeight="200" d:DesignWidth="200">
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="10"/>
+        </Style>
+    </Window.Resources>
+    <StackPanel>
+        <ComboBox ItemsSource="{Binding CategoriesCat}"
+              SelectedValue="{Binding SelectedCategoryCat}"
+              Margin="10"
+              DisplayMemberPath="Name"/>
+        <CheckBox 
+            Content="Стены"
+            IsChecked="{Binding IsCategoryWall}"     
+            Command="{Binding ShowWalls}"/>
+
+        <CheckBox 
+            Content="Перекрытия" 
+            IsChecked="{Binding IsCategoryFloor}"            
+            Command="{Binding ShowFloors}"/>
+        
+    </StackPanel>
+</Window>
