@@ -12,10 +12,6 @@
         </Style>
     </Window.Resources>
     <StackPanel>
-        <ComboBox ItemsSource="{Binding CategoriesCat}"
-              SelectedValue="{Binding SelectedCategoryCat}"
-              Margin="10"
-              DisplayMemberPath="Name"/>
         <CheckBox 
             Content="Стены"
             IsChecked="{Binding IsCategoryWall}"     
@@ -23,8 +19,16 @@
 
         <CheckBox 
             Content="Перекрытия" 
-            IsChecked="{Binding IsCategoryFloor}"            
+            IsChecked="{Binding IsCategoryFloor, UpdateSourceTrigger= PropertyChanged}"            
             Command="{Binding ShowFloors}"/>
-        
+        <CheckBox 
+            Content="Несущая арматура" 
+            IsChecked="{Binding IsCategoryRebar, UpdateSourceTrigger= PropertyChanged}"            
+            Command="{Binding ShowRebars}"/>    
+        <Button
+            Command="{Binding ShowListElement}"
+            Content="Показать список элементов"
+            Margin="5"
+            Padding="5"/>
     </StackPanel>
 </Window>

@@ -1,137 +1,105 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using CheckBox.Model;
 using Prism.Commands;
 using Prism.Mvvm;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using WallUtils = CheckBox.Model.WallUtils;
 
 namespace CheckBox
 {
-    public class MainViewViewModel : BindableBase
+    public class MainViewViewModel : INotifyPropertyChanged
     {
         private bool _isCategoryWall;
         private bool _isCategoryFloor;
+        private bool _isCategoryRebar;
 
         public bool IsCategoryWall
         {
             get { return _isCategoryWall; }
-            set { SetProperty(ref _isCategoryWall, value); }
+            set { _isCategoryWall = value; NotifyPropertyChanged(nameof(IsCategoryWall)); }
         }
-
         public bool IsCategoryFloor
         {
             get { return _isCategoryFloor; }
-            set { SetProperty(ref _isCategoryFloor, value); }
+            set { _isCategoryFloor = value; NotifyPropertyChanged(nameof(IsCategoryFloor)); }
         }
+        public bool IsCategoryRebar
+        {
+            get { return _isCategoryRebar; }
+            set { _isCategoryRebar = value; NotifyPropertyChanged(nameof(IsCategoryRebar)); }
+        }
+        private void NotifyPropertyChanged(string v)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(v));
+        }        
 
         private ExternalCommandData _commandData;
-        
-        public List<Category> CategoriesCat { get; } = new List<Category> { };
-        public Category CategoryCat { get; }
-        public DelegateCommand ShowCategoryCat { get; }
-        public DelegateCommand ShowWalls { get; }
-        public DelegateCommand ShowFloors { get; }
-        public Category SelectedCategoryCat { get; set; }
-       
 
+        public DelegateCommand ShowListElement { get; }
+        
         public MainViewViewModel(ExternalCommandData commandData)
         {
-            _commandData = commandData;
-            CategoriesCat = CategoryGeneralCat.GetCategories(commandData);
-            //ShowCategoryCat = new DelegateCommand(OnShowCategoryCat);
-            ShowWalls = new DelegateCommand(OnShowWalls);
-            ShowFloors = new DelegateCommand(OnShowFloors);
+            _commandData = commandData;          
+            ShowListElement = new DelegateCommand(OnShowListElement);
         }
 
-        private void OnShowFloors()
+        private void OnShowListElement()
         {
-            foreach (var category in CategoriesCat)
-            {
-                if (category.Name == "Перекрытия")
-                {
-                    UIDocument uidoc = _commandData.Application.ActiveUIDocument;
-                    Document doc = uidoc.Document;
-                    ICollection<ElementId> selectionElementIds = new List<ElementId>();
-                    
-                    if (IsCategoryFloor)
-                    {
+            WallUtils wallUtils = new WallUtils();
+            FloorUtils floorUtils = new FloorUtils();
+            RebarUtils rebarUtils = new RebarUtils();
 
-                        var listOfElements = new FilteredElementCollector(doc, doc.ActiveView.Id)
-                        .ToElements();
+            // Создайте словарь для хранения списков элементов для разных категорий.
+            Dictionary<string, List<string>> categoryElements = new Dictionary<string, List<string>>();
 
-                        foreach (Element element in listOfElements)
-                        {
-                            if (element.Category != null && element.Category.Name.Equals("Перекрытия"))
-                            {
-                                selectionElementIds.Add(element.Id);
-                            }
-                        }
-                        uidoc.Selection.SetElementIds(selectionElementIds);
-                        //RaiseCloseRequest();
-                    }
-                    else if (!IsCategoryFloor)
-                    {
-                        List<ElementId> floorsToDeselect = new List<ElementId>();
-                        uidoc.Selection.SetElementIds(floorsToDeselect);
-                    }
-                    //RaiseCloseRequest();
-                }
-            }
-        }
+            // Заполняйте словарь для каждой категории.
+            categoryElements["Wall"] = wallUtils.GetElementName(_commandData);
+            categoryElements["Floor"] = floorUtils.GetElementName(_commandData);
+            categoryElements["Rebar"] = rebarUtils.GetElementName(_commandData);
+            //categoryElements["Framing"] = floorUtils.GetElementName(_commandData);
+            // Добавьте другие категории таким же образом.
 
-        private void OnShowWalls()
-        {           
-            UIDocument uidoc = _commandData.Application.ActiveUIDocument;
-            Document doc = uidoc.Document;
-            ICollection<ElementId> selectionElementIds = new List<ElementId>();
+            // Создайте строку для хранения результатов.
+            string elementName = string.Empty;
 
-
+            // Проверьте флажки для каждой категории и объедините соответствующие списки элементов.
             if (IsCategoryWall)
             {
-                var listOfElements = new FilteredElementCollector(doc, doc.ActiveView.Id)
-                .ToElements();
-
-                foreach (Element element in listOfElements)
-                {
-                    if (element.Category != null && element.Category.Name.Equals("Стены"))
-                    {
-                        selectionElementIds.Add(element.Id);
-                    }
-                }
-                uidoc.Selection.SetElementIds(selectionElementIds);
-                //RaiseCloseRequest();                
+                elementName += "\nWall Elements:\n";
+                elementName += string.Join("\n", categoryElements["Wall"]) + "\n";
             }
-            else if (!IsCategoryWall)
+
+            if (IsCategoryFloor)
             {
-                List<ElementId> wallsToDeselect = new List<ElementId>();
-                uidoc.Selection.SetElementIds(wallsToDeselect);
+                elementName += "\nFloor Elements:\n";
+                elementName += string.Join("\n", categoryElements["Floor"]) + "\n";
+            }
+
+            if (IsCategoryRebar)
+            {
+                elementName += "\nRebar Elements:\n";
+                elementName += string.Join("\n", categoryElements["Rebar"]) + "\n";
+            }
+
+            // Добавьте другие проверки для остальных категорий.
+
+            if (string.IsNullOrEmpty(elementName))
+            {
+                TaskDialog.Show("Title", "Ничего не выбрано!");
+            }
+            else
+            {
+                TaskDialog.Show("Title", elementName);
             }            
-        }
-        //private void OnShowCategoryCat()
-        //{
-        //    UIDocument uidoc = _commandData.Application.ActiveUIDocument;
-        //    Document doc = uidoc.Document;
-
-        //    ICollection<ElementId> selectionElementIds = new List<ElementId>();
-        //    var listOfElements = new FilteredElementCollector(doc, doc.ActiveView.Id)
-        //        .ToElements();
-
-        //    foreach (Element element in listOfElements)
-        //    {
-        //        if (element.Category != null && element.Category.Name.Equals(SelectedCategoryCat.Name))
-        //        {
-        //            selectionElementIds.Add(element.Id);
-        //        }
-        //    }
-        //    uidoc.Selection.SetElementIds(selectionElementIds);
-
-        //    RaiseCloseRequest();
-        //}
+        }       
 
         public event EventHandler HideRequest;
 
@@ -148,56 +116,12 @@ namespace CheckBox
         }
 
         public event EventHandler CloseRequest;
+        public event PropertyChangedEventHandler PropertyChanged;
 
         private void RaiseCloseRequest()
         {
             CloseRequest?.Invoke(this, EventArgs.Empty);
         }
     }
-    //public static class CategoryGeneralCat
-    //{
-        
-    //    //public static List<Category> GetCategories(ExternalCommandData commandData)
-    //    //{
-    //    //    UIDocument uidoc = commandData.Application.ActiveUIDocument;
-    //    //    Document doc = uidoc.Document;
-    //    //    List<Category> categoryNames = new List<Category>();
 
-    //    //    List<string> categoryNamesStr = new List<string>();
-
-    //    //    FilteredElementCollector collector = new FilteredElementCollector(doc, doc.ActiveView.Id);
-    //    //    ICollection<Element> elementsInView = collector.ToElements();
-
-    //    //    // Получение уникальных категорий элементов
-    //    //    foreach (Element element in elementsInView)
-    //    //    {
-    //    //        if (element.Category != null)
-    //    //        {
-    //    //            string categoryName = element.Category.Name;
-    //    //            Category category = element.Category;
-    //    //            if (!categoryNamesStr.Contains(categoryName) && category != null)
-    //    //            {
-    //    //                categoryNamesStr.Add(categoryName);
-    //    //                categoryNames.Add(category);
-    //    //            }
-    //    //        }
-    //    //    }
-    //    //    Comparison<Category> comparison = (x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase);
-    //    //    categoryNames.Sort(comparison);
-    //    //    return categoryNames;
-    //    //}
-    //    //public static Category GetCategory(ExternalCommandData commandData)
-    //    //{
-    //    //    foreach (Category category in GetCategories(commandData))
-    //    //    {
-    //    //        CategoryModel categoryModel = new CategoryModel
-    //    //        {
-    //    //            Name = category.Name,
-    //    //            IsSelected = false
-    //    //        };
-    //    //        return categoryModel;
-    //    //    }
-    //    //}
-
-    //}
 }
