@@ -20,7 +20,7 @@ namespace CheckBox.Model
 
             foreach (Element element in listOfElements)
             {
-                if (element.Category != null && element.Category.Name.Equals("Перекрытия"))
+                if (element.Category != null && element.Category.Name.Equals("Floors"))
                 {
                     selectionElementIds.Add(element.Id);
                 }
@@ -39,7 +39,7 @@ namespace CheckBox.Model
 
             foreach (Element element in listOfElements)
             {
-                if (element.Category != null && element.Category.Name.Equals("Перекрытия"))
+                if (element.Category != null && element.Category.Name.Equals("Floors"))
                 {
                     string elementName = element.Name.ToString();
                     selectionElementNames.Add(elementName);
@@ -47,6 +47,26 @@ namespace CheckBox.Model
             }
 
             return selectionElementNames;
+        }
+
+        public List<Element> GetElements(ExternalCommandData commandData)
+        {
+            UIDocument uidoc = commandData.Application.ActiveUIDocument;
+            Document doc = uidoc.Document;
+            List<Element> floorElements = new List<Element>();
+            var listOfElements = new FilteredElementCollector(doc, doc.ActiveView.Id)
+            .ToElements();
+
+            foreach (Element element in listOfElements)
+            {
+                if (element.Category != null && element.Category.Name.Equals("Floors"))
+                {
+                    var floorElement = element as Floor;
+                    floorElements.Add(floorElement);
+                }
+            }
+
+            return floorElements;
         }
     }
 }

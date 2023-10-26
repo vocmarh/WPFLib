@@ -21,7 +21,7 @@ namespace CheckBox
         private bool _isCategoryWall;
         private bool _isCategoryFloor;
         private bool _isCategoryRebar;
-        private ObservableCollection<WallData> data;
+        private ObservableCollection<ElementData> data;
         private bool isInstance = true;
         public bool IsInstance
         {
@@ -44,7 +44,7 @@ namespace CheckBox
             get { return _isCategoryRebar; }
             set { _isCategoryRebar = value; NotifyPropertyChanged(nameof(IsCategoryRebar)); }
         }
-        public ObservableCollection<WallData> Data 
+        public ObservableCollection<ElementData> Data 
         {
             get => data;
             set { data = value; NotifyPropertyChanged(nameof(Data));
@@ -69,30 +69,87 @@ namespace CheckBox
 
         private void OnGetDataBase()
         {
-            WallUtils wallUtils = new WallUtils();
-            List<Element> walls = wallUtils.GetElements(_commandData);
-            Data = new ObservableCollection<WallData>();
-            double volume = 0;
-           
-
-            foreach (Element wall in walls)
+            Data = new ObservableCollection<ElementData>();
+            if (IsCategoryWall)
             {
-                Parameter volPar = wall.get_Parameter(BuiltInParameter.HOST_VOLUME_COMPUTED);
-                volume = volPar.AsDouble();
-                double volumeMeters = UnitUtils.ConvertFromInternalUnits(volume, DisplayUnitType.DUT_CUBIC_METERS);
-                try
+                WallUtils wallUtils = new WallUtils();
+                List<Element> walls = wallUtils.GetElements(_commandData);
+                
+                double volume = 0;
+
+
+                foreach (Element wall in walls)
                 {
-                    Data.Add(new WallData
+                    Parameter volPar = wall.get_Parameter(BuiltInParameter.HOST_VOLUME_COMPUTED);
+                    volume = volPar.AsDouble();
+                    double volumeMeters = UnitUtils.ConvertFromInternalUnits(volume, DisplayUnitType.DUT_CUBIC_METERS);
+                    try
                     {
-                        ElementName = wall.Name,                        
-                        Volume = volumeMeters
-                    });
+                        Data.Add(new ElementData
+                        {
+                            ElementName = wall.Name,
+                            Volume = volumeMeters,
+                            CategoryName = wall.Category.Name
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        TaskDialog.Show("Error", ex.Message);
+                    }
                 }
-                catch (Exception ex)
-                {                     
-                    TaskDialog.Show("Erro", ex.Message);
+            }
+            if (IsCategoryFloor)
+            {
+                FloorUtils floorUtils = new FloorUtils();
+                List<Element> floors = floorUtils.GetElements(_commandData);                
+                double volume = 0;
+
+                foreach (Element floor in floors)
+                {
+                    Parameter volPar = floor.get_Parameter(BuiltInParameter.HOST_VOLUME_COMPUTED);
+                    volume = volPar.AsDouble();
+                    double volumeMeters = UnitUtils.ConvertFromInternalUnits(volume, DisplayUnitType.DUT_CUBIC_METERS);
+                    try
+                    {
+                        Data.Add(new ElementData
+                        {
+                            ElementName = floor.Name,
+                            Volume = volumeMeters,
+                            CategoryName = floor.Category.Name
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        TaskDialog.Show("Error", ex.Message);
+                    }
                 }
-            }                   
+            }
+            if (IsCategoryRebar)
+            {
+                RebarUtils rebarUtils = new RebarUtils();
+                List<Element> rebars = rebarUtils.GetElements(_commandData);
+                double volume = 0;
+
+                foreach (Element rebar in rebars)
+                {
+                    //Parameter volPar = rebar.get_Parameter(BuiltInParameter.HOST_VOLUME_COMPUTED);
+                    //volume = volPar.AsDouble();
+                    //double volumeMeters = UnitUtils.ConvertFromInternalUnits(volume, DisplayUnitType.DUT_CUBIC_METERS);
+                    try
+                    {
+                        Data.Add(new ElementData
+                        {
+                            ElementName = rebar.Name,
+                            Volume = 0,
+                            CategoryName = rebar.Category.Name
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        TaskDialog.Show("Error", ex.Message);
+                    }
+                }
+            }
         }       
 
         private void OnShowListElement()

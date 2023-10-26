@@ -21,12 +21,11 @@ namespace CheckBox.Model
 
             foreach (Element element in listOfElements)
             {
-                if (element.Category != null && element.Category.Name.Equals("Стены"))
+                if (element.Category != null && element.Category.Name.Equals("Walls"))
                 {
                     selectionElementIds.Add(element.Id);
                 }
             }
-            //uidoc.Selection.SetElementIds(selectionElementIds);
             return selectionElementIds;
         }
 
@@ -40,7 +39,7 @@ namespace CheckBox.Model
 
             foreach (Element element in listOfElements)
             {
-                if (element.Category != null && element.Category.Name.Equals("Стены"))
+                if (element.Category != null && element.Category.Name.Equals("Walls"))
                 {
                     string elementName = element.Name.ToString();
                     selectionElementNames.Add(elementName);
@@ -54,13 +53,13 @@ namespace CheckBox.Model
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
             Document doc = uidoc.Document;
             double volume = 0;
-            //List<double> volumes = new List<double>();
+
             var listOfElements = new FilteredElementCollector(doc, doc.ActiveView.Id)
             .ToElements();
 
             foreach (Element element in listOfElements)
             {
-                if (element.Category != null && element.Category.Name.Equals("Стены"))
+                if (element.Category != null && element.Category.Name.Equals("Walls"))
                 {
                     Parameter volPar = element.get_Parameter(BuiltInParameter.HOST_VOLUME_COMPUTED);
                     volume = volPar.AsDouble(); 
@@ -80,13 +79,13 @@ namespace CheckBox.Model
 
             foreach (Element element in listOfElements)
             {
-                if (element.Category != null && element.Category.Name.Equals("Стены"))
+                if (element.Category != null && element.Category.Name.Equals("Walls"))
                 {
                     var wallElement = element as Wall;
                     wallElements.Add(wallElement);
                 }
             }
-            //uidoc.Selection.SetElementIds(selectionElementIds);
+
             return wallElements;
         }
     }
