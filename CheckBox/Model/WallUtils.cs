@@ -49,5 +49,45 @@ namespace CheckBox.Model
             
             return selectionElementNames;
         }
+        public double GetVolume(ExternalCommandData commandData)
+        {
+            UIDocument uidoc = commandData.Application.ActiveUIDocument;
+            Document doc = uidoc.Document;
+            double volume = 0;
+            //List<double> volumes = new List<double>();
+            var listOfElements = new FilteredElementCollector(doc, doc.ActiveView.Id)
+            .ToElements();
+
+            foreach (Element element in listOfElements)
+            {
+                if (element.Category != null && element.Category.Name.Equals("Стены"))
+                {
+                    Parameter volPar = element.get_Parameter(BuiltInParameter.HOST_VOLUME_COMPUTED);
+                    volume = volPar.AsDouble(); 
+                    //volumes.Add(volume);
+                }
+            }
+
+            return volume;
+        }
+        public List<Element> GetElements(ExternalCommandData commandData)
+        {
+            UIDocument uidoc = commandData.Application.ActiveUIDocument;
+            Document doc = uidoc.Document;
+            List<Element> wallElements = new List<Element>();   
+            var listOfElements = new FilteredElementCollector(doc, doc.ActiveView.Id)
+            .ToElements();
+
+            foreach (Element element in listOfElements)
+            {
+                if (element.Category != null && element.Category.Name.Equals("Стены"))
+                {
+                    var wallElement = element as Wall;
+                    wallElements.Add(wallElement);
+                }
+            }
+            //uidoc.Selection.SetElementIds(selectionElementIds);
+            return wallElements;
+        }
     }
 }

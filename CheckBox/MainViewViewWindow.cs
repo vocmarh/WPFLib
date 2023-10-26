@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using System.Windows.Markup;
 using WallUtils = CheckBox.Model.WallUtils;
 
 namespace CheckBox
@@ -20,6 +21,13 @@ namespace CheckBox
         private bool _isCategoryWall;
         private bool _isCategoryFloor;
         private bool _isCategoryRebar;
+        private ObservableCollection<WallData> data;
+        private bool isInstance = true;
+        public bool IsInstance
+        {
+            get { return isInstance; }
+            set { isInstance = value; NotifyPropertyChanged(nameof(IsInstance)); }
+        }       
 
         public bool IsCategoryWall
         {
@@ -36,20 +44,56 @@ namespace CheckBox
             get { return _isCategoryRebar; }
             set { _isCategoryRebar = value; NotifyPropertyChanged(nameof(IsCategoryRebar)); }
         }
+        public ObservableCollection<WallData> Data 
+        {
+            get => data;
+            set { data = value; NotifyPropertyChanged(nameof(Data));
+    }
+}
         private void NotifyPropertyChanged(string v)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(v));
-        }        
+        }            
 
         private ExternalCommandData _commandData;
 
         public DelegateCommand ShowListElement { get; }
-        
+        public DelegateCommand GetDataBase { get; }
+
         public MainViewViewModel(ExternalCommandData commandData)
         {
             _commandData = commandData;          
             ShowListElement = new DelegateCommand(OnShowListElement);
+            GetDataBase = new DelegateCommand(OnGetDataBase);
         }
+
+        private void OnGetDataBase()
+        {
+            WallUtils wallUtils = new WallUtils();
+            List<Element> walls = wallUtils.GetElements(_commandData);
+            Data = new ObservableCollection<WallData>();
+            double volume = 0;
+           
+
+            foreach (Element wall in walls)
+            {
+                Parameter volPar = wall.get_Parameter(BuiltInParameter.HOST_VOLUME_COMPUTED);
+                volume = volPar.AsDouble();
+                double volumeMeters = UnitUtils.ConvertFromInternalUnits(volume, DisplayUnitType.DUT_CUBIC_METERS);
+                try
+                {
+                    Data.Add(new WallData
+                    {
+                        ElementName = wall.Name,                        
+                        Volume = volumeMeters
+                    });
+                }
+                catch (Exception ex)
+                {                     
+                    TaskDialog.Show("Erro", ex.Message);
+                }
+            }                   
+        }       
 
         private void OnShowListElement()
         {

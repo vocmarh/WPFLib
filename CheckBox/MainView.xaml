@@ -5,30 +5,71 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CheckBox"
              mc:Ignorable="d" 
-             d:DesignHeight="200" d:DesignWidth="200">
+             d:DesignHeight="450" 
+             d:DesignWidth="800">
     <Window.Resources>
-        <Style TargetType="Button">
-            <Setter Property="Margin" Value="10"/>
-        </Style>
+        
     </Window.Resources>
-    <StackPanel>
-        <CheckBox 
-            Content="Стены"
-            IsChecked="{Binding IsCategoryWall}"     
-            Command="{Binding ShowWalls}"/>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="175"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="1" Grid.Column="0">
+            <CheckBox
+                Content="Стены"
+                IsChecked="{Binding IsCategoryWall}"     
+                Command="{Binding ShowWalls}"/>
+            <CheckBox 
+                Content="Перекрытия" 
+                IsChecked="{Binding IsCategoryFloor, UpdateSourceTrigger= PropertyChanged}"            
+                Command="{Binding ShowFloors}"/>
+            <CheckBox 
+                Content="Несущая арматура" 
+                IsChecked="{Binding IsCategoryRebar, UpdateSourceTrigger= PropertyChanged}"            
+                Command="{Binding ShowRebars}"/>
+            <Button
+                Command="{Binding ShowListElement}"
+                Content="Показать список элементов"
+                Margin="5"
+                Padding="5"/>
+            <Button
+                Command="{Binding GetDataBase}"
+                Content="Добавить в базу элементы"
+                Margin="5"
+                Padding="5"/>
+        </StackPanel>
 
-        <CheckBox 
-            Content="Перекрытия" 
-            IsChecked="{Binding IsCategoryFloor, UpdateSourceTrigger= PropertyChanged}"            
-            Command="{Binding ShowFloors}"/>
-        <CheckBox 
-            Content="Несущая арматура" 
-            IsChecked="{Binding IsCategoryRebar, UpdateSourceTrigger= PropertyChanged}"            
-            Command="{Binding ShowRebars}"/>    
-        <Button
-            Command="{Binding ShowListElement}"
-            Content="Показать список элементов"
-            Margin="5"
-            Padding="5"/>
-    </StackPanel>
+        <DataGrid Grid.Row="1" Grid.Column="1"
+            Name="elementDataGrid" 
+            AutoGenerateColumns="True" 
+            Margin="10"
+            ItemsSource="{Binding Data}" 
+            IsReadOnly="True"           
+            ScrollViewer.HorizontalScrollBarVisibility="Visible"
+            ScrollViewer.VerticalScrollBarVisibility="Visible">
+
+
+        <!--<DataGrid Grid.Row="1" Grid.Column="1"
+            Name="ElementList"           
+            Margin="10"
+            IsReadOnly="True"
+            ItemsSource="{Binding Data}"
+            ScrollViewer.HorizontalScrollBarVisibility="Visible"
+            ScrollViewer.VerticalScrollBarVisibility="Visible">
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{Binding ElementName>}"/>
+                    <DataGridTextColumn Header="Volume" Binding="{Binding Volume>}"/>
+            </DataGrid.Columns>-->
+            
+            
+        </DataGrid>
+
+    </Grid>
+    
 </Window>
