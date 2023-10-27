@@ -11,6 +11,6 @@ namespace CheckBox.Model
         public string ElementName { get; set; }
         public double Volume { get; set; }
         public string CategoryName { get; set; }
-
+        public string Level {  get; set; }
     }
 }

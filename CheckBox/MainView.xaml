@@ -31,12 +31,7 @@
             <CheckBox 
                 Content="Несущая арматура" 
                 IsChecked="{Binding IsCategoryRebar, UpdateSourceTrigger= PropertyChanged}"            
-                Command="{Binding ShowRebars}"/>
-            <Button
-                Command="{Binding ShowListElement}"
-                Content="Показать список элементов"
-                Margin="5"
-                Padding="5"/>
+                Command="{Binding ShowRebars}"/>            
             <Button
                 Command="{Binding GetDataBase}"
                 Content="Добавить в базу элементы"

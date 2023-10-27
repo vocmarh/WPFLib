@@ -69,6 +69,7 @@
     </Compile>
     <Compile Include="MainViewViewWindow.cs" />
     <Compile Include="Model\FloorUtils.cs" />
+    <Compile Include="Model\ProcessElements.cs" />
     <Compile Include="Model\RebarUtils.cs" />
     <Compile Include="Model\ElementData.cs" />
     <Compile Include="Model\WallUtils.cs" />

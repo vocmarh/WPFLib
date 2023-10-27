@@ -57,9 +57,11 @@ namespace CheckBox.Model
             var listOfElements = new FilteredElementCollector(doc, doc.ActiveView.Id)
             .ToElements();
 
+            string categoryStr = Category.GetCategory(doc, BuiltInCategory.OST_Floors).Name;
+
             foreach (Element element in listOfElements)
             {
-                if (element.Category != null && element.Category.Name.Equals("Floors"))
+                if (element.Category != null && element.Category.Name.Equals(categoryStr)) 
                 {
                     var floorElement = element as Floor;
                     floorElements.Add(floorElement);

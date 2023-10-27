@@ -56,25 +56,52 @@ namespace CheckBox
         }            
 
         private ExternalCommandData _commandData;
+        private Document _doc;
 
         public DelegateCommand ShowListElement { get; }
         public DelegateCommand GetDataBase { get; }
 
         public MainViewViewModel(ExternalCommandData commandData)
         {
-            _commandData = commandData;          
-            ShowListElement = new DelegateCommand(OnShowListElement);
+            _commandData = commandData; 
             GetDataBase = new DelegateCommand(OnGetDataBase);
         }
 
         private void OnGetDataBase()
         {
             Data = new ObservableCollection<ElementData>();
+            ProcessElements processElements = new ProcessElements();
+
             if (IsCategoryWall)
             {
                 WallUtils wallUtils = new WallUtils();
                 List<Element> walls = wallUtils.GetElements(_commandData);
-                
+                processElements.GetProcessElements(walls, Data);
+            }
+
+            if (IsCategoryFloor)
+            {
+                FloorUtils floorUtils = new FloorUtils();
+                List<Element> floors = floorUtils.GetElements(_commandData);
+                processElements.GetProcessElements(floors, Data);
+            }
+
+            if (IsCategoryRebar)
+            {
+                RebarUtils rebarUtils = new RebarUtils();
+                List<Element> rebars = rebarUtils.GetElements(_commandData);
+                processElements.GetProcessElements(rebars, Data);
+            }
+        }
+
+        private void OnGetDataBase1()
+        {
+            Data = new ObservableCollection<ElementData>();
+            if (IsCategoryWall)
+            {
+                WallUtils wallUtils = new WallUtils();
+                List<Element> walls = wallUtils.GetElements(_commandData);
+
                 double volume = 0;
 
 
@@ -101,7 +128,7 @@ namespace CheckBox
             if (IsCategoryFloor)
             {
                 FloorUtils floorUtils = new FloorUtils();
-                List<Element> floors = floorUtils.GetElements(_commandData);                
+                List<Element> floors = floorUtils.GetElements(_commandData);
                 double volume = 0;
 
                 foreach (Element floor in floors)
@@ -128,19 +155,15 @@ namespace CheckBox
             {
                 RebarUtils rebarUtils = new RebarUtils();
                 List<Element> rebars = rebarUtils.GetElements(_commandData);
-                double volume = 0;
 
                 foreach (Element rebar in rebars)
                 {
-                    //Parameter volPar = rebar.get_Parameter(BuiltInParameter.HOST_VOLUME_COMPUTED);
-                    //volume = volPar.AsDouble();
-                    //double volumeMeters = UnitUtils.ConvertFromInternalUnits(volume, DisplayUnitType.DUT_CUBIC_METERS);
                     try
                     {
                         Data.Add(new ElementData
                         {
                             ElementName = rebar.Name,
-                            Volume = 0,
+
                             CategoryName = rebar.Category.Name
                         });
                     }
@@ -150,7 +173,8 @@ namespace CheckBox
                     }
                 }
             }
-        }       
+        }
+
 
         private void OnShowListElement()
         {

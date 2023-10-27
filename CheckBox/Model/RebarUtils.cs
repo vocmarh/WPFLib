@@ -58,9 +58,11 @@ namespace CheckBox.Model
             var listOfElements = new FilteredElementCollector(doc, doc.ActiveView.Id)
             .ToElements();
 
+            string categoryStr = Category.GetCategory(doc, BuiltInCategory.OST_Rebar).Name;
+
             foreach (Element element in listOfElements)
             {
-                if (element.Category != null && element.Category.Name.Equals("Structural Rebar"))
+                if (element.Category != null && element.Category.Name.Equals(categoryStr))
                 {                    
                     rebarElements.Add(element);
                 }
