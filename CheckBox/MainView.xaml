@@ -3,41 +3,43 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:CheckBox"
+             xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+             xmlns:local="clr-namespace:CheckBox"             
              mc:Ignorable="d" 
              d:DesignHeight="450" 
              d:DesignWidth="800">
     <Window.Resources>
-        
+        <CollectionViewSource x:Key="SortedCategories" Source="{Binding Categories}">
+            <CollectionViewSource.SortDescriptions>
+                <scm:SortDescription PropertyName="Name"/>
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="175"/>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="25"/>
             <RowDefinition />
+            <RowDefinition />
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="1" Grid.Column="0">
+        <!--<StackPanel Grid.Row="2" Grid.Column="0">
             <CheckBox
                 Content="Стены"
-                IsChecked="{Binding IsCategoryWall}"     
-                Command="{Binding ShowWalls}"/>
+                IsChecked="{Binding IsCategoryWall}"/>
+
             <CheckBox 
                 Content="Перекрытия" 
-                IsChecked="{Binding IsCategoryFloor, UpdateSourceTrigger= PropertyChanged}"            
-                Command="{Binding ShowFloors}"/>
+                IsChecked="{Binding IsCategoryFloor, UpdateSourceTrigger= PropertyChanged}"/>
+
             <CheckBox 
                 Content="Несущая арматура" 
-                IsChecked="{Binding IsCategoryRebar, UpdateSourceTrigger= PropertyChanged}"            
-                Command="{Binding ShowRebars}"/>            
-            <Button
-                Command="{Binding GetDataBase}"
-                Content="Добавить в базу элементы"
-                Margin="5"
-                Padding="5"/>
-        </StackPanel>
+                IsChecked="{Binding IsCategoryRebar, UpdateSourceTrigger= PropertyChanged}"/>
+          
+                    
+        </StackPanel>-->
 
         <DataGrid Grid.Row="1" Grid.Column="1"
             Name="elementDataGrid" 
@@ -47,23 +49,30 @@
             IsReadOnly="True"           
             ScrollViewer.HorizontalScrollBarVisibility="Visible"
             ScrollViewer.VerticalScrollBarVisibility="Visible">
-
-
-        <!--<DataGrid Grid.Row="1" Grid.Column="1"
-            Name="ElementList"           
-            Margin="10"
-            IsReadOnly="True"
-            ItemsSource="{Binding Data}"
-            ScrollViewer.HorizontalScrollBarVisibility="Visible"
-            ScrollViewer.VerticalScrollBarVisibility="Visible">
-
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Name" Binding="{Binding ElementName>}"/>
-                    <DataGridTextColumn Header="Volume" Binding="{Binding Volume>}"/>
-            </DataGrid.Columns>-->
-            
-            
         </DataGrid>
+
+        <StackPanel Grid.Row="1" Grid.Column="0">
+            <ItemsControl 
+                ItemsSource="{Binding Source={StaticResource SortedCategories}}"
+                
+                 Margin="5">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <CheckBox Content="{Binding Name}" 
+                      IsChecked="{Binding IsSelected}"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <Button
+                Command="{Binding GetDataBase}"
+                Content="Обновить базу элементов"
+                Margin="5"
+                Padding="5"/>
+        </StackPanel>
+
+        
+        
 
     </Grid>
     

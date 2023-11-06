@@ -63,12 +63,15 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\CategoryModel.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="MainView.xaml.cs">
       <DependentUpon>MainView.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainViewViewWindow.cs" />
     <Compile Include="Model\FloorUtils.cs" />
+    <Compile Include="Model\GetElemByCat.cs" />
+    <Compile Include="Model\ListOfCategories.cs" />
     <Compile Include="Model\ProcessElements.cs" />
     <Compile Include="Model\RebarUtils.cs" />
     <Compile Include="Model\ElementData.cs" />

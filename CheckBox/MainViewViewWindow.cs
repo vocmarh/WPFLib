@@ -8,11 +8,12 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Markup;
-using WallUtils = CheckBox.Model.WallUtils;
+
 
 namespace CheckBox
 {
@@ -22,207 +23,67 @@ namespace CheckBox
         private bool _isCategoryFloor;
         private bool _isCategoryRebar;
         private ObservableCollection<ElementData> data;
-        private bool isInstance = true;
-        public bool IsInstance
+        private ObservableCollection<CategoryModel> categories;
+        private bool isSelected = true;
+        public bool IsSelected
         {
-            get { return isInstance; }
-            set { isInstance = value; NotifyPropertyChanged(nameof(IsInstance)); }
-        }       
-
-        public bool IsCategoryWall
-        {
-            get { return _isCategoryWall; }
-            set { _isCategoryWall = value; NotifyPropertyChanged(nameof(IsCategoryWall)); }
-        }
-        public bool IsCategoryFloor
-        {
-            get { return _isCategoryFloor; }
-            set { _isCategoryFloor = value; NotifyPropertyChanged(nameof(IsCategoryFloor)); }
-        }
-        public bool IsCategoryRebar
-        {
-            get { return _isCategoryRebar; }
-            set { _isCategoryRebar = value; NotifyPropertyChanged(nameof(IsCategoryRebar)); }
-        }
+            get { return isSelected; }
+            set { isSelected = value; NotifyPropertyChanged(nameof(IsSelected)); }
+        }           
         public ObservableCollection<ElementData> Data 
         {
             get => data;
-            set { data = value; NotifyPropertyChanged(nameof(Data));
-    }
-}
+            set { data = value; NotifyPropertyChanged(nameof(Data)); }
+        }
+        public ObservableCollection<CategoryModel> Categories
+        {
+            get => categories;
+            set { categories = value; NotifyPropertyChanged(nameof(Categories));}
+        }
+        
         private void NotifyPropertyChanged(string v)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(v));
         }            
 
-        private ExternalCommandData _commandData;
-        private Document _doc;
+        private ExternalCommandData _commandData;       
 
         public DelegateCommand ShowListElement { get; }
         public DelegateCommand GetDataBase { get; }
-
+        public DelegateCommand ShowElements { get; }
         public MainViewViewModel(ExternalCommandData commandData)
         {
-            _commandData = commandData; 
+            _commandData = commandData;
             GetDataBase = new DelegateCommand(OnGetDataBase);
-        }
+
+            Categories = new ObservableCollection<CategoryModel>();
+            ListOfCategories listOfCategories = new ListOfCategories();
+
+            listOfCategories.GetCategories(_commandData, Categories);            
+        }      
 
         private void OnGetDataBase()
         {
             Data = new ObservableCollection<ElementData>();
             ProcessElements processElements = new ProcessElements();
 
-            if (IsCategoryWall)
+            GetElemByCat getElemByCat = new GetElemByCat();
+            
+            if (isSelected)
             {
-                WallUtils wallUtils = new WallUtils();
-                List<Element> walls = wallUtils.GetElements(_commandData);
-                processElements.GetProcessElements(walls, Data);
-            }
-
-            if (IsCategoryFloor)
-            {
-                FloorUtils floorUtils = new FloorUtils();
-                List<Element> floors = floorUtils.GetElements(_commandData);
-                processElements.GetProcessElements(floors, Data);
-            }
-
-            if (IsCategoryRebar)
-            {
-                RebarUtils rebarUtils = new RebarUtils();
-                List<Element> rebars = rebarUtils.GetElements(_commandData);
-                processElements.GetProcessElements(rebars, Data);
-            }
-        }
-
-        private void OnGetDataBase1()
-        {
-            Data = new ObservableCollection<ElementData>();
-            if (IsCategoryWall)
-            {
-                WallUtils wallUtils = new WallUtils();
-                List<Element> walls = wallUtils.GetElements(_commandData);
-                double volume = 0;
-
-                foreach (Element wall in walls)
+                foreach (var category in Categories)
                 {
-                    Parameter volPar = wall.get_Parameter(BuiltInParameter.HOST_VOLUME_COMPUTED);
-                    volume = volPar.AsDouble();
-                    double volumeMeters = UnitUtils.ConvertFromInternalUnits(volume, DisplayUnitType.DUT_CUBIC_METERS);
-                    try
+                    if (category.IsSelected)
                     {
-                        Data.Add(new ElementData
+                        List<Element> elements = getElemByCat.GetElementsByCategoryName(category.Name, _commandData);
+                        if (elements != null)
                         {
-                            ElementName = wall.Name,
-                            Volume = volumeMeters,
-                            CategoryName = wall.Category.Name
-                        });
+                            processElements.GetProcessElements(elements, Data, _commandData);
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        TaskDialog.Show("Error", ex.Message);
-                    }
-                }
+                }                
             }
-            if (IsCategoryFloor)
-            {
-                FloorUtils floorUtils = new FloorUtils();
-                List<Element> floors = floorUtils.GetElements(_commandData);
-                double volume = 0;
-
-                foreach (Element floor in floors)
-                {
-                    Parameter volPar = floor.get_Parameter(BuiltInParameter.HOST_VOLUME_COMPUTED);
-                    volume = volPar.AsDouble();
-                    double volumeMeters = UnitUtils.ConvertFromInternalUnits(volume, DisplayUnitType.DUT_CUBIC_METERS);
-                    try
-                    {
-                        Data.Add(new ElementData
-                        {
-                            ElementName = floor.Name,
-                            Volume = volumeMeters,
-                            CategoryName = floor.Category.Name
-                        });
-                    }
-                    catch (Exception ex)
-                    {
-                        TaskDialog.Show("Error", ex.Message);
-                    }
-                }
-            }
-            if (IsCategoryRebar)
-            {
-                RebarUtils rebarUtils = new RebarUtils();
-                List<Element> rebars = rebarUtils.GetElements(_commandData);
-
-                foreach (Element rebar in rebars)
-                {
-                    try
-                    {
-                        Data.Add(new ElementData
-                        {
-                            ElementName = rebar.Name,
-
-                            CategoryName = rebar.Category.Name
-                        });
-                    }
-                    catch (Exception ex)
-                    {
-                        TaskDialog.Show("Error", ex.Message);
-                    }
-                }
-            }
-        }
-
-
-        private void OnShowListElement()
-        {
-            WallUtils wallUtils = new WallUtils();
-            FloorUtils floorUtils = new FloorUtils();
-            RebarUtils rebarUtils = new RebarUtils();
-
-            // Создайте словарь для хранения списков элементов для разных категорий.
-            Dictionary<string, List<string>> categoryElements = new Dictionary<string, List<string>>();
-
-            // Заполняйте словарь для каждой категории.
-            categoryElements["Wall"] = wallUtils.GetElementName(_commandData);
-            categoryElements["Floor"] = floorUtils.GetElementName(_commandData);
-            categoryElements["Rebar"] = rebarUtils.GetElementName(_commandData);
-            //categoryElements["Framing"] = floorUtils.GetElementName(_commandData);
-            // Добавьте другие категории таким же образом.
-
-            // Создайте строку для хранения результатов.
-            string elementName = string.Empty;
-
-            // Проверьте флажки для каждой категории и объедините соответствующие списки элементов.
-            if (IsCategoryWall)
-            {
-                elementName += "\nWall Elements:\n";
-                elementName += string.Join("\n", categoryElements["Wall"]) + "\n";
-            }
-
-            if (IsCategoryFloor)
-            {
-                elementName += "\nFloor Elements:\n";
-                elementName += string.Join("\n", categoryElements["Floor"]) + "\n";
-            }
-
-            if (IsCategoryRebar)
-            {
-                elementName += "\nRebar Elements:\n";
-                elementName += string.Join("\n", categoryElements["Rebar"]) + "\n";
-            }
-
-            // Добавьте другие проверки для остальных категорий.
-
-            if (string.IsNullOrEmpty(elementName))
-            {
-                TaskDialog.Show("Title", "Ничего не выбрано!");
-            }
-            else
-            {
-                TaskDialog.Show("Title", elementName);
-            }            
-        }       
+        }    
 
         public event EventHandler HideRequest;
 
