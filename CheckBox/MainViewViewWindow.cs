@@ -101,9 +101,7 @@ namespace CheckBox
             {
                 WallUtils wallUtils = new WallUtils();
                 List<Element> walls = wallUtils.GetElements(_commandData);
-
                 double volume = 0;
-
 
                 foreach (Element wall in walls)
                 {
