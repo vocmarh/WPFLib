@@ -19,9 +19,6 @@ namespace CheckBox
 {
     public class MainViewViewModel : INotifyPropertyChanged
     {
-        private bool _isCategoryWall;
-        private bool _isCategoryFloor;
-        private bool _isCategoryRebar;
         private ObservableCollection<ElementData> data;
         private ObservableCollection<CategoryModel> categories;
         private bool isSelected = true;
@@ -47,18 +44,14 @@ namespace CheckBox
         }            
 
         private ExternalCommandData _commandData;       
-
-        public DelegateCommand ShowListElement { get; }
         public DelegateCommand GetDataBase { get; }
-        public DelegateCommand ShowElements { get; }
         public MainViewViewModel(ExternalCommandData commandData)
         {
             _commandData = commandData;
             GetDataBase = new DelegateCommand(OnGetDataBase);
-
             Categories = new ObservableCollection<CategoryModel>();
-            ListOfCategories listOfCategories = new ListOfCategories();
 
+            ListOfCategories listOfCategories = new ListOfCategories();
             listOfCategories.GetCategories(_commandData, Categories);            
         }      
 

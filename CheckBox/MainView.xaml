@@ -53,8 +53,7 @@
 
         <StackPanel Grid.Row="1" Grid.Column="0">
             <ItemsControl 
-                ItemsSource="{Binding Source={StaticResource SortedCategories}}"
-                
+                ItemsSource="{Binding Source={StaticResource SortedCategories}}"               
                  Margin="5">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
@@ -69,11 +68,8 @@
                 Content="Обновить базу элементов"
                 Margin="5"
                 Padding="5"/>
-        </StackPanel>
-
+        </StackPanel>      
         
-        
-
     </Grid>
     
 </Window>
