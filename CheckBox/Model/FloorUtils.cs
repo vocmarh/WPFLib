@@ -10,45 +10,6 @@ namespace CheckBox.Model
 {
     public class FloorUtils
     {
-        public ICollection<ElementId> GetElementIds(ExternalCommandData commandData)
-        {
-            UIDocument uidoc = commandData.Application.ActiveUIDocument;
-            Document doc = uidoc.Document;
-            ICollection<ElementId> selectionElementIds = new List<ElementId>();
-            var listOfElements = new FilteredElementCollector(doc, doc.ActiveView.Id)
-            .ToElements();
-
-            foreach (Element element in listOfElements)
-            {
-                if (element.Category != null && element.Category.Name.Equals("Floors"))
-                {
-                    selectionElementIds.Add(element.Id);
-                }
-            }
-            //uidoc.Selection.SetElementIds(selectionElementIds);
-            return selectionElementIds;
-        }
-
-        public List<string> GetElementName(ExternalCommandData commandData)
-        {
-            UIDocument uidoc = commandData.Application.ActiveUIDocument;
-            Document doc = uidoc.Document;
-            List<string> selectionElementNames = new List<string>();
-            var listOfElements = new FilteredElementCollector(doc, doc.ActiveView.Id)
-            .ToElements();
-
-            foreach (Element element in listOfElements)
-            {
-                if (element.Category != null && element.Category.Name.Equals("Floors"))
-                {
-                    string elementName = element.Name.ToString();
-                    selectionElementNames.Add(elementName);
-                }
-            }
-
-            return selectionElementNames;
-        }
-
         public List<Element> GetElements(ExternalCommandData commandData)
         {
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
@@ -69,6 +30,32 @@ namespace CheckBox.Model
             }
 
             return floorElements;
+        }
+        public List<Parameter> GetParameters(ExternalCommandData commandData)
+        {
+            UIDocument uidoc = commandData.Application.ActiveUIDocument;
+            Document doc = uidoc.Document;
+
+            var listOfElements = new FilteredElementCollector(doc, doc.ActiveView.Id)
+            .ToElements();
+
+            List<Parameter> parameters = new List<Parameter>();            
+
+            string categoryStr = Category.GetCategory(doc, BuiltInCategory.OST_Floors).Name;
+
+            foreach (Element element in listOfElements)
+            {
+                if (element.Category != null && element.Category.Name.Equals(categoryStr))
+                {                    
+                    ParameterSet parameterSet = element.Parameters;
+                    foreach (Parameter parameter in parameterSet)
+                    {
+                        parameters.Add(parameter);
+                    }
+                }
+            }
+
+            return parameters;
         }
     }
 }

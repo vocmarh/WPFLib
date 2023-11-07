@@ -13,31 +13,27 @@ namespace CheckBox.Model
 {
     public class ProcessElements
     {
-        public void GetProcessElements(List<Element> elements, ObservableCollection <ElementData> Data, ExternalCommandData commandData)
+        public void GetProcessElements(List<Element> elements, ObservableCollection<ElementData> Data, ExternalCommandData commandData)
         {
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
             Document doc = uidoc.Document;
             foreach (Element element in elements)
             {
                 try
-                {
+                {                  
                     string elementName = element.Name;
                     string categoryName = element.Category.Name;
-                    double volumeMeters = 0.0;
+                    double volume = 0.0;
                     string level = string.Empty;
 
-                    if (element.Category.Id.IntegerValue == (int)BuiltInCategory.OST_Walls || element.Category.Id.IntegerValue == (int)BuiltInCategory.OST_Floors)
+                    Parameter volPar = element.get_Parameter(BuiltInParameter.HOST_VOLUME_COMPUTED);
+                    if (volPar != null)
                     {
-                        Parameter volPar = element.get_Parameter(BuiltInParameter.HOST_VOLUME_COMPUTED);
-                        if (volPar != null)
-                        {
-                            double volume = volPar.AsDouble();
-                            volumeMeters = UnitUtils.ConvertFromInternalUnits(volume, DisplayUnitType.DUT_CUBIC_METERS);
-                        }
+                        double metr3 = Math.Pow(0.3048, 3);
+                        volume = volPar.AsDouble() * metr3;
                     }
-                    string categoryFloorStr = Category.GetCategory(doc, BuiltInCategory.OST_Walls).Name;
 
-                    if (element.Category.Name.Equals(categoryFloorStr))
+                    if (element.Category.Name.Equals(Category.GetCategory(doc, BuiltInCategory.OST_Walls).Name))
                     {
                         Parameter levPar = element.get_Parameter(BuiltInParameter.WALL_BASE_CONSTRAINT);
                         if (levPar != null)
@@ -46,9 +42,7 @@ namespace CheckBox.Model
                         }
                     }
 
-                    string categoryWallStr = Category.GetCategory(doc, BuiltInCategory.OST_Floors).Name;
-
-                    if (element.Category.Name.Equals(categoryWallStr))
+                    if (element.Category.Name.Equals(Category.GetCategory(doc, BuiltInCategory.OST_Floors).Name))
                     {
                         Parameter levPar = element.get_Parameter(BuiltInParameter.LEVEL_PARAM);
                         if (levPar != null)
@@ -60,7 +54,7 @@ namespace CheckBox.Model
                     Data.Add(new ElementData
                     {
                         ElementName = elementName,
-                        Volume = volumeMeters,
+                        Volume = volume,
                         CategoryName = categoryName,
                         Level = level,
                     });

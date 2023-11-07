@@ -36,20 +36,8 @@ namespace CheckBox.Model
                     if (!categoryNamesStr.Contains(categoryName) && category != null)
                     {
                         categoryNamesStr.Add(categoryName);
-                        categoryNames.Add(category);
-
-                        Comparison<Category> comparison = (x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase);
-                        categoryNames.Sort(comparison);
-                        try
-                        {
-                            string elementName = element.Name;
-                            
-                        }
-                        catch (Exception ex)
-                        {
-                            TaskDialog.Show("Error", ex.Message);
-                        }
-                        
+                        categoryNames.Add(category);                        
+                                                
                         Categories.Add(new CategoryModel
                         {
                             Name = categoryName,

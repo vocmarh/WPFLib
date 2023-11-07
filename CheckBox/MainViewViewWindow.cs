@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using Microsoft.Office.Interop.Excel;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,7 +38,9 @@ namespace CheckBox
             get => categories;
             set { categories = value; NotifyPropertyChanged(nameof(Categories));}
         }
-        
+
+        public DelegateCommand ExportExcel { get; }
+
         private void NotifyPropertyChanged(string v)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(v));
@@ -50,10 +53,17 @@ namespace CheckBox
             _commandData = commandData;
             GetDataBase = new DelegateCommand(OnGetDataBase);
             Categories = new ObservableCollection<CategoryModel>();
+            ExportExcel = new DelegateCommand(OnExportExcel);
 
             ListOfCategories listOfCategories = new ListOfCategories();
             listOfCategories.GetCategories(_commandData, Categories);            
-        }      
+        }
+
+        private void OnExportExcel()
+        {
+            ExcelExporters exporters = new ExcelExporters();
+            exporters.GetElementToExcel(Data);
+        }
 
         private void OnGetDataBase()
         {

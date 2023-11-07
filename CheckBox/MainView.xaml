@@ -22,24 +22,15 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="25"/>
-            <RowDefinition />
-            <RowDefinition />
+            <RowDefinition /> 
         </Grid.RowDefinitions>
-        <!--<StackPanel Grid.Row="2" Grid.Column="0">
-            <CheckBox
-                Content="Стены"
-                IsChecked="{Binding IsCategoryWall}"/>
 
-            <CheckBox 
-                Content="Перекрытия" 
-                IsChecked="{Binding IsCategoryFloor, UpdateSourceTrigger= PropertyChanged}"/>
-
-            <CheckBox 
-                Content="Несущая арматура" 
-                IsChecked="{Binding IsCategoryRebar, UpdateSourceTrigger= PropertyChanged}"/>
-          
-                    
-        </StackPanel>-->
+        <TextBox Grid.Column="1"
+                 x:Name="tbSearch"
+                 Margin="10"
+                 Text="{Binding SearchText}"
+                 TextAlignment="Left">
+        </TextBox>
 
         <DataGrid Grid.Row="1" Grid.Column="1"
             Name="elementDataGrid" 
@@ -52,7 +43,10 @@
         </DataGrid>
 
         <StackPanel Grid.Row="1" Grid.Column="0">
-            <ItemsControl 
+            <Label
+                Content="Список категорий на активном виде:">
+            </Label>
+            <ItemsControl                 
                 ItemsSource="{Binding Source={StaticResource SortedCategories}}"               
                  Margin="5">
                 <ItemsControl.ItemTemplate>
@@ -66,6 +60,11 @@
             <Button
                 Command="{Binding GetDataBase}"
                 Content="Обновить базу элементов"
+                Margin="5"
+                Padding="5"/>
+            <Button
+                Command="{Binding ExportExcel}"
+                Content="Выгрузить базу элементов в эксель"
                 Margin="5"
                 Padding="5"/>
         </StackPanel>      

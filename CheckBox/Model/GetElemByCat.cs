@@ -15,26 +15,23 @@ namespace CheckBox.Model
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
             Document doc = uidoc.Document;
 
-            string categoryFloorStr = Category.GetCategory(doc, BuiltInCategory.OST_Floors).Name;
-            if (categoryName == categoryFloorStr)
+            if (categoryName == Category.GetCategory(doc, BuiltInCategory.OST_Floors).Name)
             {
                 FloorUtils floorUtils = new FloorUtils();
                 return floorUtils.GetElements(commandData);
             }
 
-            string categoryWallStr = Category.GetCategory(doc, BuiltInCategory.OST_Walls).Name;
-            if (categoryName == categoryWallStr)
-            {
-                WallUtils wallUtils = new WallUtils();
-                return wallUtils.GetElements(commandData);
-            }
+            //if (categoryName == Category.GetCategory(doc, BuiltInCategory.OST_Walls).Name)
+            //{
+            //    WallUtils wallUtils = new WallUtils();
+            //    return wallUtils.GetElements(commandData);
+            //}
 
-            string categoryRebarStr = Category.GetCategory(doc, BuiltInCategory.OST_Rebar).Name;
-            if (categoryName == categoryRebarStr)
-            {
-                RebarUtils rebarUtils = new RebarUtils();
-                return rebarUtils.GetElements(commandData);
-            }
+            //if (categoryName == Category.GetCategory(doc, BuiltInCategory.OST_Rebar).Name)
+            //{
+            //    RebarUtils rebarUtils = new RebarUtils();
+            //    return rebarUtils.GetElements(commandData);
+            //}
 
             return new List<Element>();
         }
