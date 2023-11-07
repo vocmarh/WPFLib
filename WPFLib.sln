@@ -5,6 +5,8 @@ VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheckBox", "CheckBox\CheckBox.csproj", "{C3F6F8CF-C027-45C5-81C9-25ACF154988B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLExport", "SQLExport\SQLExport.csproj", "{D10AF41B-D428-4F5D-890C-7A3CA8DC010A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{C3F6F8CF-C027-45C5-81C9-25ACF154988B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3F6F8CF-C027-45C5-81C9-25ACF154988B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C3F6F8CF-C027-45C5-81C9-25ACF154988B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D10AF41B-D428-4F5D-890C-7A3CA8DC010A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D10AF41B-D428-4F5D-890C-7A3CA8DC010A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D10AF41B-D428-4F5D-890C-7A3CA8DC010A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D10AF41B-D428-4F5D-890C-7A3CA8DC010A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
