@@ -78,7 +78,7 @@ namespace CheckBox
                 {
                     if (category.IsSelected)
                     {
-                        List<Element> elements = getElemByCat.GetElementsByCategoryName(category.Name, _commandData);
+                        List<Element> elements = getElemByCat.GetElementsByCategoryName(category.CategoryName, _commandData);
                         if (elements != null)
                         {
                             processElements.GetProcessElements(elements, Data, _commandData);

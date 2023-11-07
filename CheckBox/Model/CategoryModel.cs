@@ -2,7 +2,7 @@
 {
     public class CategoryModel
     {
-        public string Name { get; set; }
+        public string CategoryName { get; set; }
         public bool IsSelected { get; set; }
 
     }

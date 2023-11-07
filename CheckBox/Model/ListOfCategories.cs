@@ -40,7 +40,7 @@ namespace CheckBox.Model
                                                 
                         Categories.Add(new CategoryModel
                         {
-                            Name = categoryName,
+                            CategoryName = categoryName,
                             IsSelected = false,
                         });
                    
