@@ -30,32 +30,6 @@ namespace CheckBox.Model
             }
 
             return floorElements;
-        }
-        public List<Parameter> GetParameters(ExternalCommandData commandData)
-        {
-            UIDocument uidoc = commandData.Application.ActiveUIDocument;
-            Document doc = uidoc.Document;
-
-            var listOfElements = new FilteredElementCollector(doc, doc.ActiveView.Id)
-            .ToElements();
-
-            List<Parameter> parameters = new List<Parameter>();            
-
-            string categoryStr = Category.GetCategory(doc, BuiltInCategory.OST_Floors).Name;
-
-            foreach (Element element in listOfElements)
-            {
-                if (element.Category != null && element.Category.Name.Equals(categoryStr))
-                {                    
-                    ParameterSet parameterSet = element.Parameters;
-                    foreach (Parameter parameter in parameterSet)
-                    {
-                        parameters.Add(parameter);
-                    }
-                }
-            }
-
-            return parameters;
-        }
+        }        
     }
 }

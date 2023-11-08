@@ -92,6 +92,7 @@
                 Content="Обновить базу элементов"
                 Margin="5"
                 Padding="5"/>
+            
             <Button
                 Command="{Binding ExportExcel}"
                 Content="Выгрузить базу элементов в эксель"

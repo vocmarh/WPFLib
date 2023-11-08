@@ -13,7 +13,11 @@ namespace CheckBox.Model
         public double Volume { get; set; }
         public string CategoryName { get; set; }
         public string Level {  get; set; }
-        
+        public double Area { get; set; }
+        public string BoundaryRoom { get; set; }
+        public double Length { get; set; }
+
+
     }
     
 

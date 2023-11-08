@@ -67,6 +67,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\ElementParameters.cs" />
     <Compile Include="Model\CategoryModel.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="MainView.xaml.cs">
@@ -74,9 +75,11 @@
     </Compile>
     <Compile Include="MainViewViewWindow.cs" />
     <Compile Include="Model\ExcelExporters.cs" />
+    <Compile Include="Model\FamilyInstanceUtils.cs" />
     <Compile Include="Model\FloorUtils.cs" />
     <Compile Include="Model\GetElemByCat.cs" />
     <Compile Include="Model\ListOfCategories.cs" />
+    <Compile Include="Model\ParameterData.cs" />
     <Compile Include="Model\ProcessElements.cs" />
     <Compile Include="Model\RebarUtils.cs" />
     <Compile Include="Model\ElementData.cs" />

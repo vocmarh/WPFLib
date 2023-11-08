@@ -21,6 +21,7 @@ namespace CheckBox
     public class MainViewViewModel : INotifyPropertyChanged
     {
         private ObservableCollection<ElementData> data;
+     
         private ObservableCollection<CategoryModel> categories;
         private bool isSelected = true;
         private string _searchText;
@@ -34,6 +35,7 @@ namespace CheckBox
             get => data;
             set { data = value; NotifyPropertyChanged(nameof(Data)); }
         }
+        
         public ObservableCollection<CategoryModel> Categories
         {
             get => categories;
@@ -45,15 +47,11 @@ namespace CheckBox
             set { _searchText = value; NotifyPropertyChanged(nameof(SearchText)); }
         }
 
-        private bool filterSearchText(object item)
+        private ObservableCollection<List<ParameterData>> newData;
+        public ObservableCollection<List<ParameterData>> NewData
         {
-            CategoryModel catModel = (CategoryModel)item;
-            if (SearchText != null || SearchText != "")
-            {
-                return catModel.CategoryName.ToUpper().Contains(SearchText.ToUpper());
-
-            }
-            else { return true; }
+            get => newData;
+            set { newData = value; NotifyPropertyChanged(nameof(NewData)); }
         }
 
         public DelegateCommand ExportExcel { get; }
@@ -66,6 +64,8 @@ namespace CheckBox
 
         private ExternalCommandData _commandData;       
         public DelegateCommand GetDataBase { get; }
+        public DelegateCommand GetNewDataBase { get; }
+
         public MainViewViewModel(ExternalCommandData commandData)
         {
             _commandData = commandData;
@@ -76,7 +76,7 @@ namespace CheckBox
 
             ListOfCategories listOfCategories = new ListOfCategories();
             listOfCategories.GetCategories(_commandData, Categories);            
-        }
+        }       
 
         private void OnSearchCategoryCommand()
         {
@@ -99,28 +99,7 @@ namespace CheckBox
         {
             ExcelExporters exporters = new ExcelExporters();
             exporters.GetElementToExcel(Data);
-        }
-        private void SearchCategory()
-        {
-            // Получите введенный текст из SearchText
-            string searchText = SearchText;
-
-            // Выполните поиск категории по имени в коллекции Categories
-            CategoryModel foundCategory = Categories.FirstOrDefault(category => category.CategoryName.Contains(searchText));
-
-            // Далее, вы можете обновить ваш интерфейс или выполнить другие действия в зависимости от найденной категории
-            if (foundCategory != null)
-            {
-                // Категория найдена
-                // Дополнительные действия, например, установка флага IsSelected для категории и обновление интерфейса
-                foundCategory.IsSelected = true; // Пример установки флага IsSelected
-            }
-            else
-            {
-                // Категория не найдена
-                // Дополнительные действия, если необходимо
-            }
-        }
+        }       
 
         private void OnGetDataBase()
         {
