@@ -27,11 +27,25 @@ namespace CheckBox.Model
                     string level = string.Empty;
                     double area = 0.0;
                     string boundaryRoom = string.Empty;
+                    string length = string.Empty;
+                    string width = string.Empty;
+                    string height = string.Empty;
+                    string workSet = string.Empty;
+                    double roomArea = 0.0;
 
                     Parameter elemPar = element.get_Parameter(BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM);
                     if (elemPar != null)
                     {
                         elementName = elemPar.AsValueString();
+                    }
+
+                    if (element.Category.Name.Equals(Category.GetCategory(doc, BuiltInCategory.OST_Rooms).Name))
+                    {
+                        Parameter elemPar1 = element.get_Parameter(BuiltInParameter.ROOM_NAME);
+                        if (elemPar1 != null)
+                        {
+                            elementName = elemPar1.AsString();
+                        }
                     }
 
                     Parameter volPar = element.get_Parameter(BuiltInParameter.HOST_VOLUME_COMPUTED);
@@ -48,12 +62,32 @@ namespace CheckBox.Model
                         area = areaPar.AsDouble() * metr2;
                     }
 
+                    Parameter roomAreaPar = element.get_Parameter(BuiltInParameter.ROOM_AREA);
+                    if (roomAreaPar != null)
+                    {
+                        double metr2 = Math.Pow(0.3048, 2);
+                        roomArea = roomAreaPar.AsDouble() * metr2;
+                    }
+
                     Parameter boundaryPar = element.get_Parameter(BuiltInParameter.WALL_ATTR_ROOM_BOUNDING);
                     if (boundaryPar != null)
                     {
                         boundaryRoom = boundaryPar.AsValueString();
                     }
 
+                    Parameter lengthPar = element.get_Parameter(BuiltInParameter.CURVE_ELEM_LENGTH);
+                    if (lengthPar != null)
+                    {
+                        length = lengthPar.AsValueString();
+                    }
+
+                    Parameter workSetPar = element.get_Parameter(BuiltInParameter.ELEM_PARTITION_PARAM);
+                    if (workSetPar != null)
+                    {
+                        workSet = workSetPar.AsValueString();
+                    }
+
+                    #region LevelPar
                     if (element.Category.Name.Equals(Category.GetCategory(doc, BuiltInCategory.OST_Walls).Name))
                     {
                         Parameter levPar = element.get_Parameter(BuiltInParameter.WALL_BASE_CONSTRAINT);
@@ -99,6 +133,32 @@ namespace CheckBox.Model
                         }
                     }
 
+                    if (element.Category.Name.Equals(Category.GetCategory(doc, BuiltInCategory.OST_Rooms).Name))
+                    {
+                        Parameter levPar = element.get_Parameter(BuiltInParameter.LEVEL_NAME);
+                        if (levPar != null)
+                        {
+                            level = levPar.AsString();
+                        }
+                    }
+                    #endregion
+
+                    ElementType type = doc.GetElement(element.GetTypeId()) as ElementType;
+                    if (type != null)
+                    {
+                        Parameter widthPar = type.get_Parameter(BuiltInParameter.FURNITURE_WIDTH);
+                        if (widthPar != null)
+                        {
+                            width = widthPar.AsValueString();
+                        }
+
+                        Parameter heightPar = type.get_Parameter(BuiltInParameter.FAMILY_HEIGHT_PARAM);
+                        if (heightPar != null)
+                        {
+                            height = heightPar.AsValueString();
+                        }
+                    }                    
+
                     Data.Add(new ElementData
                     {
                         ElementName = elementName,
@@ -106,7 +166,12 @@ namespace CheckBox.Model
                         CategoryName = categoryName,
                         Level = level,
                         Area = area,
-                        BoundaryRoom = boundaryRoom
+                        BoundaryRoom = boundaryRoom,
+                        Length = length,
+                        Width = width,
+                        Height = height,
+                        WorkSet = workSet,
+                        RoomArea = roomArea,
                     });
                 }
                 catch (Exception ex)

@@ -78,5 +78,28 @@ namespace CheckBox.Model
 
             return fiElements;
         }
+
+        public List<Element> GetWindowsElements(ExternalCommandData commandData)
+        {
+            UIDocument uidoc = commandData.Application.ActiveUIDocument;
+            Document doc = uidoc.Document;
+            List<Element> fiElements = new List<Element>();
+            var listOfElements = new FilteredElementCollector(doc, doc.ActiveView.Id)
+            .OfClass(typeof(FamilyInstance))
+            .Cast<FamilyInstance>()
+            .ToList();
+
+            string categoryStr = Category.GetCategory(doc, BuiltInCategory.OST_Windows).Name;
+
+            foreach (Element element in listOfElements)
+            {
+                if (element.Category != null && element.Category.Name.Equals(categoryStr))
+                {
+                    fiElements.Add(element);
+                }
+            }
+
+            return fiElements;
+        }
     }
 }

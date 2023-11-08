@@ -51,6 +51,18 @@ namespace CheckBox.Model
                 return fiUtils.GetDoorsElements(commandData);
             }
 
+            if (categoryName == Category.GetCategory(doc, BuiltInCategory.OST_Windows).Name)
+            {
+                FamilyInstanceUtils fiUtils = new FamilyInstanceUtils();
+                return fiUtils.GetWindowsElements(commandData);
+            }
+
+            if (categoryName == Category.GetCategory(doc, BuiltInCategory.OST_Rooms).Name)
+            {
+                RoomUtils roomUtils = new RoomUtils();
+                return roomUtils.GetRoomElements(commandData);
+            }
+
             return new List<Element>();
         }
     }
