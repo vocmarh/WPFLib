@@ -80,7 +80,12 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\CheckBox\CheckBox.csproj">
+      <Project>{c3f6f8cf-c027-45c5-81c9-25acf154988b}</Project>
+      <Name>CheckBox</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>

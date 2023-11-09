@@ -14,7 +14,8 @@ namespace SQLExport.Model
         public void ConnectDB()
         {
             //Connect to SQL database
-            connect = new SqlConnection("Data Source=HRAMCOV;Initial Catalog=testing;Integrated Security=True");
+            //connect = new SqlConnection("Data Source=HRAMCOV;Initial Catalog=testing;Integrated Security=True");
+            connect = new SqlConnection("Data Source=LAPTOP-4CPNE97L;Initial Catalog=testing;Integrated Security=True");
             connect.Open();
         }
 
