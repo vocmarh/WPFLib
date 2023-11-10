@@ -106,8 +106,23 @@ namespace SQLExport.ViewModel
                             var cat = bic.ToString().Substring(bic.ToString().IndexOf("_") + 1);
                             if (cat == selectedCategory)
                             {
+                                //Добавляю параметр даты в param values                                                                 
+                                string date = string.Empty;
+                                string docPath = doc.PathName;
+                                string pattern = @"(\d{2}\.\d{2}\.\d{4})";
+
+                                Match match = Regex.Match(docPath, pattern);
+
+                                if (match.Success)
+                                {
+                                    date = match.Groups[1].Value;
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Дата не найдена.");
+                                }
                                 //Получаем название таблицы в виде: НазваниеПроекта_Перекрытия
-                                string selectedCat = projectName + "_" + cat;
+                                string selectedCat = cat;
                                 
                                 selectedCat = string.Join("", selectedCat.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries));
 
@@ -199,21 +214,7 @@ namespace SQLExport.ViewModel
                                     var ElementId = "ElementId = " + ele.Id.IntegerValue;
                                     param_values.Add(ElementId);
 
-                                    //Добавляю параметр даты в param values
-                                    string date = string.Empty;
-                                    string docPath = doc.PathName;
-                                    string pattern = @"(\d{2}\.\d{2}\.\d{4})";
-
-                                    Match match = Regex.Match(docPath, pattern);
-
-                                    if (match.Success)
-                                    {
-                                        date = match.Groups[1].Value;
-                                    }
-                                    else
-                                    {
-                                        Console.WriteLine("Дата не найдена.");
-                                    }
+                                    
                                     var dateOfProject = "Date = " + date;
                                     param_values.Add(dateOfProject);
 
