@@ -32,6 +32,8 @@ namespace CheckBox.Model
                 if (element.Category != null)
                 {
                     categoryName = element.Category.Name;
+                    categoryName = string.Join("", categoryName.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries));
+                    
                     Category category = element.Category;
                     if (!categoryNamesStr.Contains(categoryName) && category != null)
                     {
