@@ -94,6 +94,7 @@ namespace SQLExport.ViewModel
 
             foreach (var category in Categories)
             {
+                string numberSymbol = "\u2116";
                 string selectedCategory = category.CategoryName;
                 selectedCategory = string.Join("", selectedCategory.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries));
 
@@ -176,7 +177,7 @@ namespace SQLExport.ViewModel
                                 ElementCategoryFilter filter = new ElementCategoryFilter(bic);
 
                                 //получаю коллектор с элементами выбранных категорий
-                                var els = new FilteredElementCollector(doc)
+                                var els = new FilteredElementCollector(doc, doc.ActiveView.Id)
                                         .WhereElementIsNotElementType()
                                         .WhereElementIsViewIndependent()
                                         .WherePasses(categoryFilter);
@@ -229,15 +230,42 @@ namespace SQLExport.ViewModel
                                         List<string> elementParams = new List<string>(param_values[i].Split(new string[] { " = " }, StringSplitOptions.None));
                                         string elementParam = string.Join("", elementParams[0].Split(default(string[]), StringSplitOptions.RemoveEmptyEntries));
 
-                                        if (elementParam.Contains("-"))
+                                        if (elementParam.Contains("-")) 
                                         {
                                             elementParam = elementParam.Replace("-", "_");
+                                        }
+
+                                        if (elementParam.Contains(numberSymbol))
+                                        {
+                                            elementParam = elementParam.Replace(numberSymbol, "_");
                                         }
 
                                         if (elementParam.Contains("/"))
                                         {
                                             elementParam = elementParam.Replace("/", "_");
                                         }
+
+
+                                        if (elementParam.Contains("("))
+                                        {
+                                            elementParam = elementParam.Replace("(", "_");
+                                        }
+
+                                        if (elementParam.Contains(")"))
+                                        {
+                                            elementParam = elementParam.Replace(")", "_");
+                                        }
+
+                                        if (elementParam.Contains(" "))
+                                        {
+                                            elementParam = elementParam.Replace(" ", "");
+                                        }
+
+                                        if (elementParam.Contains("1"))
+                                        {
+                                            elementParam = elementParam.Replace("1", "_");
+                                        }
+
 
                                         if (elementParam.Contains("."))
                                         {
@@ -384,13 +412,23 @@ namespace SQLExport.ViewModel
             var ps = e.GetOrderedParameters();
             var param_values = new List<string>(ps.Count);
 
+            // AsValueString displays the value as the 
+            // user sees it. In some cases, the underlying
+            // database value returned by AsInteger, AsDouble,
+            // etc., may be more relevant.
             foreach (var p in ps)
-                // AsValueString displays the value as the 
-                // user sees it. In some cases, the underlying
-                // database value returned by AsInteger, AsDouble,
-                // etc., may be more relevant.
-
+            {
+                if(p.StorageType == StorageType.Integer)
+                {
+                    param_values.Add($"{p.Definition.Name} = {p.AsValueString()}");
+                }
+                else if (p.StorageType == StorageType.String)
+                {
+                    param_values.Add($"{p.Definition.Name} = {p.AsString()}");
+                }
                 param_values.Add($"{p.Definition.Name} = {p.AsValueString()}");
+
+            }
             return param_values;
         }
 
