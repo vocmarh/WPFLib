@@ -95,6 +95,7 @@ namespace SQLExport.ViewModel
             foreach (var category in Categories)
             {
                 string numberSymbol = "\u2116";
+                string angleSymbol = "\u00B0";
                 string selectedCategory = category.CategoryName;
                 selectedCategory = string.Join("", selectedCategory.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries));
 
@@ -122,8 +123,13 @@ namespace SQLExport.ViewModel
                                 {
                                     Console.WriteLine("Дата не найдена.");
                                 }
+
                                 //Получаем название таблицы в виде: НазваниеПроекта_Перекрытия
-                                string selectedCat = cat;
+                                //string selCat = cat;
+                                //StringBuilder sb = new StringBuilder(selCat);
+                                //sb.Insert(2, date);
+                                //string selectedCat = sb.ToString();
+                                string selectedCat = cat + "_" + date;
                                 
                                 selectedCat = string.Join("", selectedCat.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries));
 
@@ -161,6 +167,10 @@ namespace SQLExport.ViewModel
                                 {
                                     selectedCat = selectedCat.Replace(")", string.Empty);
                                 }
+                                if (selectedCat.Contains("."))
+                                {
+                                    selectedCat = selectedCat.Replace(".", string.Empty);
+                                }                                
 
                                 map_cat_to_uid_to_param_values.Add(selectedCat, new Dictionary<string, List<string>>());
 
@@ -228,7 +238,7 @@ namespace SQLExport.ViewModel
                                     for (var i = 0; i < param_values.Count; i++)
                                     {
                                         List<string> elementParams = new List<string>(param_values[i].Split(new string[] { " = " }, StringSplitOptions.None));
-                                        string elementParam = string.Join("", elementParams[0].Split(default(string[]), StringSplitOptions.RemoveEmptyEntries));
+                                        string elementParam = string.Join("", elementParams[0].Split(default(string[]), StringSplitOptions.None));
 
                                         if (elementParam.Contains("-")) 
                                         {
@@ -237,7 +247,12 @@ namespace SQLExport.ViewModel
 
                                         if (elementParam.Contains(numberSymbol))
                                         {
-                                            elementParam = elementParam.Replace(numberSymbol, "_");
+                                            elementParam = elementParam.Replace(numberSymbol, "");
+                                        }
+
+                                        if (elementParam.Contains(angleSymbol))
+                                        {
+                                            elementParam = elementParam.Replace(angleSymbol, "");
                                         }
 
                                         if (elementParam.Contains("/"))
@@ -258,7 +273,7 @@ namespace SQLExport.ViewModel
 
                                         if (elementParam.Contains(" "))
                                         {
-                                            elementParam = elementParam.Replace(" ", "");
+                                            elementParam = elementParam.Replace(" ", "_");
                                         }
 
                                         if (elementParam.Contains("1"))
@@ -277,47 +292,53 @@ namespace SQLExport.ViewModel
                                             elementParam = elementParam.Replace(":", "_");
                                         }
 
-                                        if (elementParam.Contains("ON"))
+                                        //if (elementParam.Contains("ON"))
+                                        //{
+                                        //    elementParam = elementParam.Replace("ON", "on" + "_" + cat);
+                                        //}
+
+                                        //if (elementParam.Contains("Select"))
+                                        //{
+                                        //    elementParam = elementParam.Replace("Select", "Select" + "_" + cat);
+                                        //}
+
+                                        //if (elementParam.Contains("Insert"))
+                                        //{
+                                        //    elementParam = elementParam.Replace("Insert", "Insert" + "_" + cat);
+                                        //}
+
+                                        //if (elementParam.Contains("Drop"))
+                                        //{
+                                        //    elementParam = elementParam.Replace("Drop", "Drop" + "_" + cat);
+                                        //}
+
+                                        //if (elementParam.Contains("Create"))
+                                        //{
+                                        //    elementParam = elementParam.Replace("Create", "Create" + "_" + cat);
+                                        //}
+
+                                        //if (elementParam.Contains("Into"))
+                                        //{
+                                        //    elementParam = elementParam.Replace("Into", "Into" + "_" + cat);
+                                        //}
+
+                                        //if (elementParam.Contains("Table"))
+                                        //{
+                                        //    elementParam = elementParam.Replace("Table", "Table" + "_" + cat);
+                                        //}
+
+                                        if(!paramListParams.Contains(elementParam))
                                         {
-                                            elementParam = elementParam.Replace("ON", "on" + "_" + cat);
+                                            paramListParams.Add(elementParam);
                                         }
 
-                                        if (elementParam.Contains("Select"))
-                                        {
-                                            elementParam = elementParam.Replace("Select", "Select" + "_" + cat);
-                                        }
-
-                                        if (elementParam.Contains("Insert"))
-                                        {
-                                            elementParam = elementParam.Replace("Insert", "Insert" + "_" + cat);
-                                        }
-
-                                        if (elementParam.Contains("Drop"))
-                                        {
-                                            elementParam = elementParam.Replace("Drop", "Drop" + "_" + cat);
-                                        }
-
-                                        if (elementParam.Contains("Create"))
-                                        {
-                                            elementParam = elementParam.Replace("Create", "Create" + "_" + cat);
-                                        }
-
-                                        if (elementParam.Contains("Into"))
-                                        {
-                                            elementParam = elementParam.Replace("Into", "Into" + "_" + cat);
-                                        }
-
-                                        if (elementParam.Contains("Table"))
-                                        {
-                                            elementParam = elementParam.Replace("Table", "Table" + "_" + cat);
-                                        }
-
-                                        paramListParams.Add(elementParam);
+                                        //paramListParams.Add(elementParam);
                                     }
                                 }
 
                                 //Get distinct parameters from paramListParams
-                                List<string> distictParams = paramListParams.Distinct().ToList();
+                                List<string> distictParams = paramListParams.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+                                
 
                                 //Declare string builders 
                                 StringBuilder sqlCreateTable = new StringBuilder("CREATE TABLE " + selectedCat + "(UniqueId varchar(255) NOT NULL PRIMARY KEY");
