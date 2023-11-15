@@ -73,6 +73,7 @@ namespace SQLExport.ViewModel
                     if (category.IsSelected)
                     {
                         string catName = category.CategoryName;
+                        
                         catName = string.Join("", catName.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries));
 
                         checkedRowsString.Add(catName);
