@@ -439,13 +439,17 @@ namespace SQLExport.ViewModel
             // etc., may be more relevant.
             foreach (var p in ps)
             {
-                if(p.StorageType == StorageType.Integer)
+                if (p.StorageType == StorageType.Integer)
                 {
                     param_values.Add($"{p.Definition.Name} = {p.AsValueString()}");
                 }
                 else if (p.StorageType == StorageType.String)
                 {
                     param_values.Add($"{p.Definition.Name} = {p.AsString()}");
+                }
+                else if (p.StorageType == StorageType.Double)
+                {
+                    param_values.Add($"{p.Definition.Name} = {p.AsValueString()}");
                 }
                 param_values.Add($"{p.Definition.Name} = {p.AsValueString()}");
 
