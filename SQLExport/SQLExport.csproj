@@ -67,6 +67,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
+    <Compile Include="Model\ParameterValues.cs" />
+    <Compile Include="Model\SaveParamsSQL.cs" />
     <Compile Include="Model\SQLDBConnect.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModel\MainViewViewModel.cs" />

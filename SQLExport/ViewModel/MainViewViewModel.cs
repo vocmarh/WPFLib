@@ -17,6 +17,7 @@ using System.Diagnostics;
 using System.Windows;
 using Prism.Services.Dialogs;
 using System.Text.RegularExpressions;
+using System.Windows.Data;
 
 namespace SQLExport.ViewModel
 {
@@ -42,26 +43,46 @@ namespace SQLExport.ViewModel
             get => categories;
             set { categories = value; NotifyPropertyChanged(nameof(Categories)); }
         }
+        //private string _searchText;
+        //public string SearchText
+        //{
+        //    get { return _searchText; }
+        //    set { _searchText = value; NotifyPropertyChanged(nameof(SearchText)); }
+        //}
+        //private string pattern;
+        //public string Pattern
+        //{
+        //    get { return pattern; }
+        //    set { pattern = value; NotifyPropertyChanged(nameof(Pattern));
+        //        FilterCategories(null); }
+        //}
+        //private ICollectionView categoriesView;
+        //public ICollectionView CategoriesView
+        //{
+        //    get { return categoriesView; }
+        //    set { categoriesView = value; NotifyPropertyChanged(nameof(CategoriesView)); }
+        //}
         private void NotifyPropertyChanged(string v)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(v));
         }
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public DelegateCommand ExportDataTable { get; }
+        public DelegateCommand CheckBoxIsChecked { get; }
         public DelegateCommand AddChosenCat { get; }
 
         public MainViewViewModel(ExternalCommandData commandData)
         {
             _commandData = commandData;
-
-            ExportDataTable = new DelegateCommand(OnExportDataTable);
+            ExportDataTable = new DelegateCommand(OnExportDataTable);            
             AddChosenCat = new DelegateCommand(OnAddChosenCat);
-
             Categories = new ObservableCollection<CategoryModel>();
+
             ListOfCategories listOfCategories = new ListOfCategories();
             listOfCategories.GetCategories(_commandData, Categories);
-
-            
+            //CategoriesView = CollectionViewSource.GetDefaultView(Categories);
+            //CategoriesView.Filter = FilterCategories;
         }
 
         private void OnAddChosenCat()
@@ -73,9 +94,6 @@ namespace SQLExport.ViewModel
                     if (category.IsSelected)
                     {
                         string catName = category.CategoryName;
-                        
-                        catName = string.Join("", catName.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries));
-
                         checkedRowsString.Add(catName);
                     }
                 }
@@ -84,10 +102,17 @@ namespace SQLExport.ViewModel
 
         private void OnExportDataTable()
         {
-            UIDocument uidoc = _commandData.Application.ActiveUIDocument;
+                UIDocument uidoc = _commandData.Application.ActiveUIDocument;
             Document doc = uidoc.Document;
+            Document arDoc = doc.Application.Documents.OfType<Document>().Where(x=>x.Title.Contains("АР")).FirstOrDefault();
+            Document vkDoc = doc.Application.Documents.OfType<Document>().Where(x => x.Title.Contains("ВК")).FirstOrDefault();
+            Document ovDoc = doc.Application.Documents.OfType<Document>().Where(x => x.Title.Contains("ОВ")).FirstOrDefault();
+            if (arDoc == null)
+            {
+                TaskDialog.Show("Ошибка", "Не найден АР файл");
+            }
 
-            Dictionary<string, Dictionary<string, List<string>>> map_cat_to_uid_to_param_values
+            Dictionary<string, Dictionary<string, List<string>>> CatElementParameterValues
              = new Dictionary<string, Dictionary<string, List<string>>>();
 
             string projectName = doc.Title;
@@ -125,11 +150,8 @@ namespace SQLExport.ViewModel
                                     Console.WriteLine("Дата не найдена.");
                                 }
 
-                                //Получаем название таблицы в виде: НазваниеПроекта_Перекрытия
-                                //string selCat = cat;
-                                //StringBuilder sb = new StringBuilder(selCat);
-                                //sb.Insert(2, date);
-                                //string selectedCat = sb.ToString();
+                                //Получаем название таблицы в виде: _Дата
+
                                 string selectedCat = cat + "_" + date;
                                 
                                 selectedCat = string.Join("", selectedCat.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries));
@@ -173,7 +195,7 @@ namespace SQLExport.ViewModel
                                     selectedCat = selectedCat.Replace(".", string.Empty);
                                 }                                
 
-                                map_cat_to_uid_to_param_values.Add(selectedCat, new Dictionary<string, List<string>>());
+                                CatElementParameterValues.Add(selectedCat, new Dictionary<string, List<string>>());
 
                                 //Получаю все ID выбранных категорий
                                 List<ElementId> bicID = new List<ElementId>();
@@ -186,12 +208,40 @@ namespace SQLExport.ViewModel
 
                                 //Apply the filter to the elements in the active document
                                 ElementCategoryFilter filter = new ElementCategoryFilter(bic);
+                                List<Element> allElements = new List<Element>();
 
                                 //получаю коллектор с элементами выбранных категорий
-                                var els = new FilteredElementCollector(doc, doc.ActiveView.Id)
+                                //var els = new FilteredElementCollector(doc, doc.ActiveView.Id)
+                                //        .WhereElementIsNotElementType()
+                                //        .WhereElementIsViewIndependent()
+                                //        .WherePasses(categoryFilter);
+                                List<Element> elsOV = new List<Element>();
+
+                                var elsAr = new FilteredElementCollector(doc, doc.ActiveView.Id)
                                         .WhereElementIsNotElementType()
                                         .WhereElementIsViewIndependent()
-                                        .WherePasses(categoryFilter);
+                                        .WherePasses(categoryFilter)
+                                        .ToElements()
+                                        .ToList();
+                                if (ovDoc != null)
+                                {
+                                    elsOV = new FilteredElementCollector(ovDoc, ovDoc.ActiveView.Id)
+                                        .WhereElementIsNotElementType()
+                                        .WhereElementIsViewIndependent()
+                                        .WherePasses(categoryFilter)
+                                        .ToElements()
+                                        .ToList();
+                                }
+                                
+                                //var elsVk = new FilteredElementCollector(doc, doc.ActiveView.Id)
+                                //        .WhereElementIsNotElementType()
+                                //        .WhereElementIsViewIndependent()
+                                //        .WherePasses(categoryFilter)
+                                //        .ToElements()
+                                //        .ToList();
+                                allElements.AddRange(elsAr);
+                                allElements.AddRange(elsOV);
+                                //allElements.AddRange(elsVk);
 
                                 List<string> paramListParams = new List<string>();
 
@@ -206,7 +256,7 @@ namespace SQLExport.ViewModel
                                     command.ExecuteNonQuery();
                                 }
 
-                                foreach (Element ele in els)
+                                foreach (Element ele in allElements)
                                 {
                                     var elementCat = ele.Category;
                                     if (null == elementCat)
@@ -216,29 +266,32 @@ namespace SQLExport.ViewModel
                                     }
 
                                     //Gets all the paramaters with extra family type and type id, etc.
-                                    List<string> param_values = GetParamValues(ele);
-
+                                    List<string> paramValues = ParameterValues.GetParamValues(ele);
+                                    
                                     //Add family name to param values
-                                    var FamilyName = "FamilyName = " + ele.Name;
-                                    param_values.Add(FamilyName);
+                                    var familyName = "FamilyName = " + ele.Name;
+                                    paramValues.Add(familyName);
 
                                     //Add element id name to param values
-                                    var ElementId = "ElementId = " + ele.Id.IntegerValue;
-                                    param_values.Add(ElementId);
+                                    var elementId = "ElementId = " + ele.Id.IntegerValue;
+                                    paramValues.Add(elementId);
 
-                                    
+                                    //Add element id name to param values
+                                    var title = "Title = " + projectName;
+                                    paramValues.Add(title);
+
                                     var dateOfProject = "Date = " + date;
-                                    param_values.Add(dateOfProject);
+                                    paramValues.Add(dateOfProject);
 
                                     string uid = ele.UniqueId;
 
                                     //Add uid, param_values and the category to map_cat_to_uid_to_param_values 
-                                    map_cat_to_uid_to_param_values[selectedCat].Add(uid, param_values);
+                                    CatElementParameterValues[selectedCat].Add(uid, paramValues);
 
                                     //Push params to list to get distict list
-                                    for (var i = 0; i < param_values.Count; i++)
+                                    for (var i = 0; i < paramValues.Count; i++)
                                     {
-                                        List<string> elementParams = new List<string>(param_values[i].Split(new string[] { " = " }, StringSplitOptions.None));
+                                        List<string> elementParams = new List<string>(paramValues[i].Split(new string[] { " = " }, StringSplitOptions.None));
                                         string elementParam = string.Join("", elementParams[0].Split(default(string[]), StringSplitOptions.None));
 
                                         if (elementParam.Contains("-")) 
@@ -291,49 +344,14 @@ namespace SQLExport.ViewModel
                                         if (elementParam.Contains(":"))
                                         {
                                             elementParam = elementParam.Replace(":", "_");
-                                        }
-
-                                        //if (elementParam.Contains("ON"))
-                                        //{
-                                        //    elementParam = elementParam.Replace("ON", "on" + "_" + cat);
-                                        //}
-
-                                        //if (elementParam.Contains("Select"))
-                                        //{
-                                        //    elementParam = elementParam.Replace("Select", "Select" + "_" + cat);
-                                        //}
-
-                                        //if (elementParam.Contains("Insert"))
-                                        //{
-                                        //    elementParam = elementParam.Replace("Insert", "Insert" + "_" + cat);
-                                        //}
-
-                                        //if (elementParam.Contains("Drop"))
-                                        //{
-                                        //    elementParam = elementParam.Replace("Drop", "Drop" + "_" + cat);
-                                        //}
-
-                                        //if (elementParam.Contains("Create"))
-                                        //{
-                                        //    elementParam = elementParam.Replace("Create", "Create" + "_" + cat);
-                                        //}
-
-                                        //if (elementParam.Contains("Into"))
-                                        //{
-                                        //    elementParam = elementParam.Replace("Into", "Into" + "_" + cat);
-                                        //}
-
-                                        //if (elementParam.Contains("Table"))
-                                        //{
-                                        //    elementParam = elementParam.Replace("Table", "Table" + "_" + cat);
-                                        //}
+                                        }                                        
 
                                         if(!paramListParams.Contains(elementParam))
                                         {
                                             paramListParams.Add(elementParam);
                                         }
 
-                                        //paramListParams.Add(elementParam);
+                                        paramListParams.Add(elementParam);
                                     }
                                 }
 
@@ -365,7 +383,7 @@ namespace SQLExport.ViewModel
                                 string tableQuery = sqlCreateTable.ToString();
                                 string setQuery = sqlSaveData.Append(sqlSaveDataValues.ToString()).ToString();
 
-                                foreach (var dictPair in map_cat_to_uid_to_param_values)
+                                foreach (var dictPair in CatElementParameterValues)
                                 {
                                     if (dictPair.Value.Count > 0)
                                     {
@@ -383,7 +401,8 @@ namespace SQLExport.ViewModel
 
                                                 try
                                                 {
-                                                    SaveParamsSQL(paramList, setQuery, uniqueId, distictParams);
+                                                    SaveParamsSQL saveParamsSQL = new SaveParamsSQL();
+                                                    saveParamsSQL.SaveSQLParams(paramList, setQuery, uniqueId, distictParams);
                                                 }
                                                 catch (Exception ex)
                                                 {
@@ -398,7 +417,8 @@ namespace SQLExport.ViewModel
                                                     //Create sql table
                                                     SqlCommand command = sqlConnection.Query(tableQuery);
                                                     command.ExecuteNonQuery();
-                                                    SaveParamsSQL(paramList, setQuery, uniqueId, distictParams);
+                                                    SaveParamsSQL saveParamsSQL = new SaveParamsSQL();
+                                                    saveParamsSQL.SaveSQLParams(paramList, setQuery, uniqueId, distictParams);
                                                 }
                                                 catch (Exception ex)
                                                 {
@@ -414,7 +434,7 @@ namespace SQLExport.ViewModel
                                     }
 
                                 }
-                                map_cat_to_uid_to_param_values.Clear();
+                                CatElementParameterValues.Clear();
                             }
                         }
                     }                    
@@ -422,145 +442,10 @@ namespace SQLExport.ViewModel
             }
             MessageBox.Show("Data successfully exported");
             checkedRowsString.Clear();
-        }
-        private static List<string> GetParamValues(Element e)
-        {
-            // Two choices: 
-            // Element.Parameters property -- Retrieves 
-            // a set containing all the parameters.
-            // GetOrderedParameters method -- Gets the 
-            // visible parameters in order.
-
-            var ps = e.GetOrderedParameters();
-            var param_values = new List<string>(ps.Count);
-
-            // AsValueString displays the value as the 
-            // user sees it. In some cases, the underlying
-            // database value returned by AsInteger, AsDouble,
-            // etc., may be more relevant.
-            foreach (var p in ps)
-            {
-                if (p.StorageType == StorageType.Integer)
-                {
-                    param_values.Add($"{p.Definition.Name} = {p.AsValueString()}");
-                }
-                else if (p.StorageType == StorageType.String)
-                {
-                    param_values.Add($"{p.Definition.Name} = {p.AsString()}");
-                }
-                else if (p.StorageType == StorageType.Double)
-                {
-                    param_values.Add($"{p.Definition.Name} = {p.AsValueString()}");
-                }
-                param_values.Add($"{p.Definition.Name} = {p.AsValueString()}");
-
-            }
-            return param_values;
-        }
-
-        private void SaveParamsSQL(List<string> paramList, string setQuery, string uniqueId, List<string> distictParams)
-        {
-            SqlCommand command = sqlConnection.Query(setQuery);
-            command.Parameters.AddWithValue($"@param1", uniqueId);
-
-            //parameters from element 
-            List<string> paramListParams = new List<string>();
-
-            //get all params from wall
-            for (var i = 0; i < paramList.Count; i++)
-            {
-                List<string> elementParams = new List<string>(paramList[i].Split(new string[] { " = " }, StringSplitOptions.None));
-                string elementParam = string.Join("", elementParams[0].Split(default(string[]), StringSplitOptions.RemoveEmptyEntries));
-
-                if (elementParam.Contains("-"))
-                {
-                    elementParam = elementParam.Replace("-", string.Empty);
-
-                }
-
-                paramListParams.Add(elementParam);
-
-            }
-
-            //remove duplicates in param list if any, try hash set or distinct instead of iterating.
-            for (int i = 0; i < paramList.Count - 1; i++)
-            {
-                for (int j = i + 1; j < paramList.Count; j++)
-                {
-
-                    List<string> elementParams = new List<string>(paramList[i].Split(new string[] { " = " }, StringSplitOptions.None));
-                    string elementParam = string.Join("", elementParams[0].Split(default(string[]), StringSplitOptions.RemoveEmptyEntries));
-
-                    List<string> elementParamsJ = new List<string>(paramList[j].Split(new string[] { " = " }, StringSplitOptions.None));
-                    string elementParamJ = string.Join("", elementParamsJ[0].Split(default(string[]), StringSplitOptions.RemoveEmptyEntries));
-
-                    if (elementParam == elementParamJ)
-                    {
-                        paramList.RemoveAt(j);
-                        paramListParams.RemoveAt(j);
-                    }
-
-                }
-            }
-
-            //Loop through all distinct parameters
-            for (var i = 0; i < distictParams.Count; i++)
-            {
-                //Get the index of the paramListParams parameter that is equal to the distinct Parameter 
-                int index = paramListParams.FindIndex(a => a == distictParams[i]);
-
-                if (index >= 0)
-                {
-                    try
-                    {
-                        List<string> elementParams = new List<string>(paramList[index].Split(new string[] { " = " }, StringSplitOptions.None));
-                        string elementParamValue = string.Join("", elementParams[1].Split(default(string[]), StringSplitOptions.RemoveEmptyEntries));
-
-                        //Remove unwanted parameters
-                        switch (elementParamValue)
-                        {
-                            case var s when elementParamValue.Contains("°"):
-                                elementParamValue = elementParamValue.Replace("°", string.Empty);
-                                break;
-                            case var s when elementParamValue.Contains("m³"):
-                                elementParamValue = elementParamValue.Replace("m³", string.Empty);
-                                break;
-                            case var s when elementParamValue.Contains("<None>"):
-                                elementParamValue = elementParamValue.Replace("<None>", string.Empty);
-                                break;
-                            case var s when elementParamValue.Contains("m²"):
-                                elementParamValue = elementParamValue.Replace("m²", string.Empty);
-                                break;
-                        }
-
-                        command.Parameters.AddWithValue($"@param{i + 2}", elementParamValue);
-
-                    }
-                    catch (SqlException ex)
-                    {
-                        MessageBox.Show(ex.ToString());
-                    }
-                }
-                else
-                {
-                    try
-                    {
-                        command.Parameters.AddWithValue($"@param{i + 2}", "");
-                    }
-                    catch (SqlException ex)
-                    {
-                        MessageBox.Show(ex.ToString());
-                    }
-                }
-
-            }
-
-            command.ExecuteNonQuery();
-        }       
+        }     
 
         private bool TableExists(string database, string name)
-        {
-            
+        {            
             try
             {
                 //SQL query to check if doors table exists
@@ -577,28 +462,16 @@ namespace SQLExport.ViewModel
                 TaskDialog.Show("Error", err.ToString());
                 return true;
             }
-        }       
-
-        public event EventHandler HideRequest;
-
-        private void RaiseHideRequest()
-        {
-            HideRequest?.Invoke(this, EventArgs.Empty);
         }
 
-        public event EventHandler ShowRequest;
-
-        private void RaiseShowRequest()
-        {
-            ShowRequest?.Invoke(this, EventArgs.Empty);
-        }
-
-        public event EventHandler CloseRequest;
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void RaiseCloseRequest()
-        {
-            CloseRequest?.Invoke(this, EventArgs.Empty);
-        }
+        //private bool FilterCategories(object obj)
+        //{
+        //    if (obj is CategoryModel category)
+        //    {
+        //        return string.IsNullOrEmpty(SearchText) || category.CategoryName.ToLower().Contains(SearchText.ToLower());
+        //    }
+        //    return false;
+        //}
+                
     }
 }

@@ -16,40 +16,18 @@ namespace CheckBox.Model
         {
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
             Document doc = uidoc.Document;
+            List<BuiltInCategory> bicCat = Enum.GetValues(typeof(BuiltInCategory)).OfType<BuiltInCategory>().ToList();
 
-            
-            string categoryName = string.Empty;
-
-            List<Category> categoryNames = new List<Category>();
-            List<string> categoryNamesStr = new List<string>();
-
-            FilteredElementCollector collector = new FilteredElementCollector(doc, doc.ActiveView.Id);
-            ICollection<Element> elementsInView = collector.ToElements();
-
-            // Получение уникальных категорий элементов
-            foreach (Element element in elementsInView)
+            foreach (var bic in bicCat)
             {
-                if (element.Category != null)
+                var cat = bic.ToString().Substring(bic.ToString().IndexOf("_") + 1);
+                Categories.Add(new CategoryModel
                 {
-                    categoryName = element.Category.Name;
-                    categoryName = string.Join("", categoryName.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries));
-                    
-                    Category category = element.Category;
-                    if (!categoryNamesStr.Contains(categoryName) && category != null)
-                    {
-                        categoryNamesStr.Add(categoryName);
-                        categoryNames.Add(category);                        
-                                                
-                        Categories.Add(new CategoryModel
-                        {
-                            CategoryName = categoryName,
-                            IsSelected = false,
-                        });
-                   
-                    }
-                }
+                    CategoryName = cat,
+                    IsSelected = false,
+                });
             }
-            
+            List<string> list = new List<string>();
         }
     }
 }

@@ -6,42 +6,64 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SQLExport.View"
              mc:Ignorable="d" 
-             d:DesignHeight="250" d:DesignWidth="500">
+             d:DesignHeight="500" d:DesignWidth="500">
     <Window.Resources>
         <CollectionViewSource x:Key="SortedCategories" Source="{Binding Categories}">
             <CollectionViewSource.SortDescriptions>
                 <scm:SortDescription PropertyName="CategoryName"/>
             </CollectionViewSource.SortDescriptions>
         </CollectionViewSource>
+        <!--<CollectionViewSource x:Key="SortedCategories" Source="{Binding BICCategories}">
+            <CollectionViewSource.SortDescriptions>
+                <scm:SortDescription PropertyName="CategoryName"/>
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>-->
     </Window.Resources>
     <Grid>
-        
-        <StackPanel>
-            <Label
-                Content="Список категорий на активном виде:"
-                HorizontalAlignment="Center">
-            </Label>
-            <ItemsControl                 
-                ItemsSource="{Binding Source={StaticResource SortedCategories}}"                   
-                Margin="5">
-                <ItemsControl.ItemTemplate>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!--<RowDefinition Height="Auto"/>-->
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Label Grid.Row="0"
+            Content="Список категорий:"
+            HorizontalAlignment ="Left">
+        </Label>
+
+        <!--<TextBox Grid.Row="1"
+            x:Name="tbxSeach"
+            Margin="10,0,10,0"
+            Text="{Binding Pattern, UpdateSourceTrigger=PropertyChanged}"
+            TextAlignment="Left">
+        </TextBox>-->
+
+        <ListBox Grid.Row="1"
+                 ItemsSource="{Binding Source={StaticResource SortedCategories}}" 
+                
+                 Margin="5"    
+                 ScrollViewer.VerticalScrollBarVisibility="Visible">
+                <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <CheckBox Content="{Binding CategoryName}" 
+                    <CheckBox Content="{Binding CategoryName}" 
                                   IsChecked="{Binding IsSelected}"/>
+                    <!--/ Checked="{Binding CheckBoxIsChecked}"/>-->
                     </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-            
-            <Button
+                </ListBox.ItemTemplate>
+        </ListBox>
+        
+        <StackPanel Grid.Row="2">
+            <Button 
                 Command="{Binding ExportDataTable}"
                 Content="Экспортировать базу данных в SQL"
                 Margin="10"
                 Padding="10"/>
-            <Button
+            <Button 
                 Command="{Binding AddChosenCat}"
                 Content="Добавить выбранные категории"
                 Margin="10"
                 Padding="10"/>
-        </StackPanel>        
+        </StackPanel>       
     </Grid>
 </Window>

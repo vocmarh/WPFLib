@@ -26,9 +26,7 @@ namespace SQLExport.View
         {
             InitializeComponent();
             MainViewViewModel vm = new MainViewViewModel(commandData);
-            vm.CloseRequest += (s, e) => this.Close();
-            vm.HideRequest += (s, e) => this.Hide();
-            vm.ShowRequest += (s, e) => this.Show();
+            
             DataContext = vm;
         }
     }
