@@ -21,13 +21,14 @@ using System.Windows.Data;
 
 namespace SQLExport.ViewModel
 {
-    public class MainViewViewModel: INotifyPropertyChanged
+    public class MainViewViewModel : INotifyPropertyChanged
     {
+        
         private Document _doc;
         private static readonly Array valueList = Enum.GetValues(typeof(BuiltInCategory));
         private static List<BuiltInCategory> builtInCatArray = valueList.OfType<BuiltInCategory>().ToList();
         private static readonly HashSet<string> checkedRowsString = new HashSet<string>();
-        private ExternalCommandData _commandData;       
+        private ExternalCommandData _commandData;
 
         private bool isSelected = true;
         public bool IsSelected
@@ -75,7 +76,7 @@ namespace SQLExport.ViewModel
         public MainViewViewModel(ExternalCommandData commandData)
         {
             _commandData = commandData;
-            ExportDataTable = new DelegateCommand(OnExportDataTable);            
+            ExportDataTable = new DelegateCommand(OnExportDataTable);
             AddChosenCat = new DelegateCommand(OnAddChosenCat);
             Categories = new ObservableCollection<CategoryModel>();
 
@@ -102,26 +103,28 @@ namespace SQLExport.ViewModel
 
         private void OnExportDataTable()
         {
-                UIDocument uidoc = _commandData.Application.ActiveUIDocument;
+            UIDocument uidoc = _commandData.Application.ActiveUIDocument;
             Document doc = uidoc.Document;
-            Document arDoc = doc.Application.Documents.OfType<Document>().Where(x=>x.Title.Contains("АР")).FirstOrDefault();
+            Document arDoc = doc.Application.Documents.OfType<Document>().Where(x => x.Title.Contains("АР")).FirstOrDefault();
             Document vkDoc = doc.Application.Documents.OfType<Document>().Where(x => x.Title.Contains("ВК")).FirstOrDefault();
             Document ovDoc = doc.Application.Documents.OfType<Document>().Where(x => x.Title.Contains("ОВ")).FirstOrDefault();
-            if (arDoc == null)
-            {
-                TaskDialog.Show("Ошибка", "Не найден АР файл");
-            }
+
+            //if (arDoc == null)
+            //{
+            //    TaskDialog.Show("Ошибка", "Не найден АР файл");
+            //}
 
             Dictionary<string, Dictionary<string, List<string>>> CatElementParameterValues
              = new Dictionary<string, Dictionary<string, List<string>>>();
 
             string projectName = doc.Title;
-            sqlConnection.ConnectDB();            
+            sqlConnection.ConnectDB();
 
             foreach (var category in Categories)
             {
                 string numberSymbol = "\u2116";
                 string angleSymbol = "\u00B0";
+                string backSlash = "\\";
                 string selectedCategory = category.CategoryName;
                 selectedCategory = string.Join("", selectedCategory.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries));
 
@@ -153,7 +156,7 @@ namespace SQLExport.ViewModel
                                 //Получаем название таблицы в виде: _Дата
 
                                 string selectedCat = cat + "_" + date;
-                                
+
                                 selectedCat = string.Join("", selectedCat.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries));
 
                                 if (selectedCat.Contains("-"))
@@ -170,7 +173,7 @@ namespace SQLExport.ViewModel
                                 {
                                     selectedCat = selectedCat.Replace("[", string.Empty);
                                 }
-                                if (selectedCat .Contains("]"))
+                                if (selectedCat.Contains("]"))
                                 {
                                     selectedCat = selectedCat.Replace("]", string.Empty);
                                 }
@@ -193,7 +196,7 @@ namespace SQLExport.ViewModel
                                 if (selectedCat.Contains("."))
                                 {
                                     selectedCat = selectedCat.Replace(".", string.Empty);
-                                }                                
+                                }
 
                                 CatElementParameterValues.Add(selectedCat, new Dictionary<string, List<string>>());
 
@@ -210,38 +213,37 @@ namespace SQLExport.ViewModel
                                 ElementCategoryFilter filter = new ElementCategoryFilter(bic);
                                 List<Element> allElements = new List<Element>();
 
-                                //получаю коллектор с элементами выбранных категорий
-                                //var els = new FilteredElementCollector(doc, doc.ActiveView.Id)
-                                //        .WhereElementIsNotElementType()
-                                //        .WhereElementIsViewIndependent()
-                                //        .WherePasses(categoryFilter);
-                                List<Element> elsOV = new List<Element>();
-
-                                var elsAr = new FilteredElementCollector(doc, doc.ActiveView.Id)
-                                        .WhereElementIsNotElementType()
-                                        .WhereElementIsViewIndependent()
-                                        .WherePasses(categoryFilter)
-                                        .ToElements()
-                                        .ToList();
-                                if (ovDoc != null)
-                                {
-                                    elsOV = new FilteredElementCollector(ovDoc, ovDoc.ActiveView.Id)
-                                        .WhereElementIsNotElementType()
-                                        .WhereElementIsViewIndependent()
-                                        .WherePasses(categoryFilter)
-                                        .ToElements()
-                                        .ToList();
-                                }
-                                
-                                //var elsVk = new FilteredElementCollector(doc, doc.ActiveView.Id)
+                                //var elsAr = new FilteredElementCollector(doc)
                                 //        .WhereElementIsNotElementType()
                                 //        .WhereElementIsViewIndependent()
                                 //        .WherePasses(categoryFilter)
                                 //        .ToElements()
                                 //        .ToList();
-                                allElements.AddRange(elsAr);
-                                allElements.AddRange(elsOV);
-                                //allElements.AddRange(elsVk);
+
+                                //var elsOV = new FilteredElementCollector(ovDoc)
+                                //        .WhereElementIsNotElementType()
+                                //        .WhereElementIsViewIndependent()
+                                //        .WherePasses(categoryFilter)
+                                //        .ToElements()
+                                //        .ToList();
+
+                                //var elsVK = new FilteredElementCollector(vkDoc)
+                                //        .WhereElementIsNotElementType()
+                                //        .WhereElementIsViewIndependent()
+                                //        .WherePasses(categoryFilter)
+                                //        .ToElements()
+                                //        .ToList();
+
+                                var elsVK = new FilteredElementCollector(doc, doc.ActiveView.Id)
+                                        .WhereElementIsNotElementType()
+                                        .WhereElementIsViewIndependent()
+                                        .WherePasses(categoryFilter)
+                                        .ToElements()
+                                        .ToList();
+
+                                //allElements.AddRange(elsAr);
+                                //allElements.AddRange(elsOV);
+                                allElements.AddRange(elsVK);
 
                                 List<string> paramListParams = new List<string>();
 
@@ -267,7 +269,7 @@ namespace SQLExport.ViewModel
 
                                     //Gets all the paramaters with extra family type and type id, etc.
                                     List<string> paramValues = ParameterValues.GetParamValues(ele);
-                                    
+
                                     //Add family name to param values
                                     var familyName = "FamilyName = " + ele.Name;
                                     paramValues.Add(familyName);
@@ -294,7 +296,7 @@ namespace SQLExport.ViewModel
                                         List<string> elementParams = new List<string>(paramValues[i].Split(new string[] { " = " }, StringSplitOptions.None));
                                         string elementParam = string.Join("", elementParams[0].Split(default(string[]), StringSplitOptions.None));
 
-                                        if (elementParam.Contains("-")) 
+                                        if (elementParam.Contains("-"))
                                         {
                                             elementParam = elementParam.Replace("-", "_");
                                         }
@@ -313,6 +315,7 @@ namespace SQLExport.ViewModel
                                         {
                                             elementParam = elementParam.Replace("/", "_");
                                         }
+
 
 
                                         if (elementParam.Contains("("))
@@ -335,6 +338,12 @@ namespace SQLExport.ViewModel
                                             elementParam = elementParam.Replace("1", "_");
                                         }
 
+                                        if (elementParam.Contains("\\"))
+                                        {
+                                            elementParam = elementParam.Replace("\\", "_");
+                                        }
+                                        
+
 
                                         if (elementParam.Contains("."))
                                         {
@@ -344,9 +353,9 @@ namespace SQLExport.ViewModel
                                         if (elementParam.Contains(":"))
                                         {
                                             elementParam = elementParam.Replace(":", "_");
-                                        }                                        
+                                        }
 
-                                        if(!paramListParams.Contains(elementParam))
+                                        if (!paramListParams.Contains(elementParam))
                                         {
                                             paramListParams.Add(elementParam);
                                         }
@@ -357,7 +366,7 @@ namespace SQLExport.ViewModel
 
                                 //Get distinct parameters from paramListParams
                                 List<string> distictParams = paramListParams.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-                                
+
 
                                 //Declare string builders 
                                 StringBuilder sqlCreateTable = new StringBuilder("CREATE TABLE " + selectedCat + "(UniqueId varchar(255) NOT NULL PRIMARY KEY");
@@ -437,18 +446,17 @@ namespace SQLExport.ViewModel
                                 CatElementParameterValues.Clear();
                             }
                         }
-                    }                    
+                    }
                 }
             }
             MessageBox.Show("Data successfully exported");
             checkedRowsString.Clear();
-        }     
+        }
 
         private bool TableExists(string database, string name)
-        {            
+        {
             try
             {
-                //SQL query to check if doors table exists
                 string existsQuery = "select case when exists((select * FROM [" + database + "].sys.tables " +
                     "WHERE name = '" + name + "')) then 1 else 0 end";
 
@@ -463,15 +471,5 @@ namespace SQLExport.ViewModel
                 return true;
             }
         }
-
-        //private bool FilterCategories(object obj)
-        //{
-        //    if (obj is CategoryModel category)
-        //    {
-        //        return string.IsNullOrEmpty(SearchText) || category.CategoryName.ToLower().Contains(SearchText.ToLower());
-        //    }
-        //    return false;
-        //}
-                
     }
 }
