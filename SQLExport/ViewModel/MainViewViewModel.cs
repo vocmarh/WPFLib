@@ -124,7 +124,6 @@ namespace SQLExport.ViewModel
             {
                 string numberSymbol = "\u2116";
                 string angleSymbol = "\u00B0";
-                string backSlash = "\\";
                 string selectedCategory = category.CategoryName;
                 selectedCategory = string.Join("", selectedCategory.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries));
 
@@ -286,6 +285,7 @@ namespace SQLExport.ViewModel
                                     paramValues.Add(dateOfProject);
 
                                     string uid = ele.UniqueId;
+                                    string backSlash = @"\";
 
                                     //Add uid, param_values and the category to map_cat_to_uid_to_param_values 
                                     CatElementParameterValues[selectedCat].Add(uid, paramValues);
@@ -338,9 +338,9 @@ namespace SQLExport.ViewModel
                                             elementParam = elementParam.Replace("1", "_");
                                         }
 
-                                        if (elementParam.Contains("\\"))
+                                        if (elementParam.Contains(backSlash))
                                         {
-                                            elementParam = elementParam.Replace("\\", "_");
+                                            elementParam = elementParam.Replace(backSlash, "_");
                                         }
                                         
 
